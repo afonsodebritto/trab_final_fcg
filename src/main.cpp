@@ -457,6 +457,7 @@ int main(int argc, char* argv[])
 
         model = Matrix_Identity();
         // Aplicar a rotação contínua
+        // Ajuda
 
         model *= Matrix_Rotate_X(rotor_angle);
         PushMatrix(model);
