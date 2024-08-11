@@ -84,8 +84,8 @@ void Airplane::UpdateRotation(bool rotateRight, bool rotateLeft, bool rotateUp, 
 {
     float acceleration_rotate = delta_time * (speed + 5) / 2;
     float delta_rotate_pitch = acceleration_rotate * (fabs(yaw) + 1) / 100;
-    float delta_rotate_roll = acceleration_rotate * (fabs(yaw) + 1) / 50;
-    float delta_rotate_yaw = acceleration_rotate * (fabs(yaw) + 1) / 100;
+    float delta_rotate_roll = acceleration_rotate * (fabs(roll) + 1) / 50;
+    float delta_rotate_yaw = acceleration_rotate * (fabs(pitch) + 1) / 100;
 
     // Aceleração e desaceleração
     const bool FLYING = Position.y > 0.1;
@@ -188,7 +188,7 @@ void Airplane::UpdateAirDensity()
     float R = 287.05f;     // Constante específica do ar (J/(kg*K))
 
     // Cálculo da densidade
-    float T = T_0 - L * (Position.y*100);
+    float T = T_0 - L * (Position.y*10);
     float expoente = (g / (R * L)) - 1;
     float rho = rho_0 * pow((T / T_0), expoente);
 
