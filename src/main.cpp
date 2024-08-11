@@ -38,7 +38,7 @@ void TextRendering_PrintString(GLFWwindow* window, const std::string &str, float
 
 // Funções abaixo renderizam como texto na janela OpenGL algumas matrizes e
 // outras informações do programa. Definidas após main().
-void TextRendering_ShowEulerAngles(GLFWwindow* window, float rotationAngleZ, float rotationAngleX);
+void TextRendering_ShowEulerAngles(GLFWwindow* window, float yaw, float pitch);
 void TextRendering_ShowFramesPerSecond(GLFWwindow* window);
 
 // Funções callback para comunicação com o sistema operacional e interação do
@@ -188,7 +188,7 @@ int main()
     glm::mat4 the_model;
     glm::mat4 the_view;
 
-    Airplane Airplane(glm::vec4(0.0f,0.0f,0.0f,1.0f), 0.0f, 0.0f, 2.0f, 12.0f);
+    Airplane Airplane(glm::vec4(0.0f,0.0f,0.0f,1.0f), 0.0f, 0.0f, 0.0f, 10.0f, 50.0f);
     Camera Camera;
 
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
@@ -214,12 +214,10 @@ int main()
         float farPlane  = -2000.0f; // Posição do "far plane"
         float fov = PI / 3.0f;
 
-        Camera.Update(g_ScreenRatio, Airplane.Position, Airplane.rotationAngleX, Airplane.rotationAngleZ, 6.0f);
+        Camera.Update(g_ScreenRatio, Airplane);
         Camera.Matrix(fov, nearPlane, farPlane, GpuProgram);
         Airplane.Movimentation(keyPressedLeftShift, keyPressedA, keyPressedD, keyPressedS, keyPressedW, keyPressedLeftControl, deltaTime);
 
-        printf("speed: %f\n", Airplane.speed);
-        printf("pos: %f\n", Airplane.Position.y);
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(Airplane.Matrix));
         DrawCube(render_as_black_uniform);
 
@@ -264,7 +262,7 @@ int main()
 
         // Imprimimos na tela os ângulos de Euler que controlam a rotação do
         // terceiro cubo.
-        TextRendering_ShowEulerAngles(window, Airplane.rotationAngleZ, Airplane.rotationAngleX);
+        TextRendering_ShowEulerAngles(window, Airplane.yaw, Airplane.pitch);
 
         // Imprimimos na tela informação sobre o número de quadros renderizados
         // por segundo (frames per second).
@@ -706,7 +704,7 @@ void ErrorCallback(int error, const char* description)
 
 // Escrevemos na tela os ângulos de Euler definidos nas variáveis globais
 // g_CameraTheta, g_CameraPhi, e g_CameraDistance.
-void TextRendering_ShowEulerAngles(GLFWwindow* window, float rotationAngleZ, float rotationAngleX)
+void TextRendering_ShowEulerAngles(GLFWwindow* window, float yaw, float pitch)
 {
     if ( !g_ShowInfoText )
         return;
@@ -714,7 +712,7 @@ void TextRendering_ShowEulerAngles(GLFWwindow* window, float rotationAngleZ, flo
     float pad = TextRendering_LineHeight(window);
 
     char buffer[80];
-    snprintf(buffer, 80, "Euler Angles rotation matrix = Z(%.2f)*Y(%.2f)*X(%.2f)\n", rotationAngleZ, 0.0, rotationAngleX);
+    snprintf(buffer, 80, "Euler Angles rotation matrix = Z(%.2f)*Y(%.2f)*X(%.2f)\n", yaw, 0.0, pitch);
 
     TextRendering_PrintString(window, buffer, -1.0f+pad/10, -1.0f+2*pad/10, 1.0f);
 }

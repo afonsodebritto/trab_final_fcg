@@ -8,6 +8,7 @@
 
 #include"shaderClass.h"
 #include"Matrices.h"
+#include"Airplane.h"
 
 class Camera
 {
@@ -22,13 +23,14 @@ public:
 
 	// Stores the width and height of the window
 	float screenRatio;
-	float rotationAngleX;
 	float distance;
-	float rotationAngleZ;
+	float pitch;
+	float roll;
+	float yaw;
 
 
 
-	void Update(float screenRatio, glm::vec4 lookat, float rotationAngleX, float rotationAngleZ, float distance);
+	void Update(float screenRatio, Airplane airplane);
 	// Updates and exports the camera matrix to the Vertex Shader
 	void Matrix(float fov, float nearPlane, float farPlane, Shader& shader);
 };
