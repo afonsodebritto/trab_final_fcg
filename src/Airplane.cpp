@@ -5,7 +5,7 @@ void Airplane::Movimentation(bool accelerate, bool rotateRight, bool rotateLeft,
     // pitts special s2
     // 10m = 1m = 1.0f -> valores adaptados para essa restrição
     // Atualiza a direção do avião considerando as rotações atuais
-    Direction = Matrix_Rotate_Y(-yaw) * Matrix_Rotate_X(-pitch) * Matrix_Rotate_Z(-roll) * glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
+    Direction = Matrix_Rotate_Y(yaw) * Matrix_Rotate_X(pitch) * Matrix_Rotate_Z(roll) * glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
     Direction = Direction / norm(Direction);
     const bool FLYING = Position.y > 0.1;
 
@@ -15,17 +15,14 @@ void Airplane::Movimentation(bool accelerate, bool rotateRight, bool rotateLeft,
     UpdateSpeed(accelerate, brake, delta_time);
     UpdateAirDensity();
 
-    if (speed < 0)
-        speed = 0;
     
-    glm::vec4 Velocity = Direction * speed;
+    glm::vec4 Velocity = Direction * speed * delta_time;
 
     // Sustentação (lift) que contrabalança a gravidade, mantendo o avião em voo
     float lift_force = 0.5 * lift_coefficient * air_density * reference_area * pow(speed, 2);
-    // Força da gravidade
-    float gravity_force = mass * gravity;
+    float lift_acceleration = lift_force / mass;
 
-    float accelerationZ = (lift_force + gravity_force);
+    float accelerationZ = lift_acceleration - gravity;
 
     Velocity.y += accelerationZ * delta_time / 10;
 
@@ -35,11 +32,11 @@ void Airplane::Movimentation(bool accelerate, bool rotateRight, bool rotateLeft,
 
     Velocity += DragAcceleration * delta_time;
 
-    Position += Velocity * delta_time;
+    Position += Velocity;
 
     printf("gravity %f\n", gravity);
-    printf("gravity_force %f\n", gravity_force);
-    printf("lift_force %f\n", lift_force);
+    printf("gravity %f\n", gravity);
+    printf("lift_acceleration %f\n", lift_acceleration);
     printf("accelerationn %f\n", accelerationZ);
     printf("result: %f\n", accelerationZ);
     printf("speed: %f\n", speed);
@@ -49,9 +46,9 @@ void Airplane::Movimentation(bool accelerate, bool rotateRight, bool rotateLeft,
 
     // Atualiza a matriz de transformação do avião
     Matrix = Matrix_Translate(Position.x, Position.y, Position.z) *
-             Matrix_Rotate_Y(-yaw) *
-             Matrix_Rotate_X(-pitch) *
-             Matrix_Rotate_Z(-roll);
+             Matrix_Rotate_Y(yaw) *
+             Matrix_Rotate_X(pitch) *
+             Matrix_Rotate_Z(roll);
 }
 
 void Airplane::UpdateSpeed(bool accelerate, bool brake, float delta_time)
@@ -75,7 +72,7 @@ void Airplane::UpdateSpeed(bool accelerate, bool brake, float delta_time)
 
     if (!accelerate && speed > 0)
         if(!FLYING)
-            speed -= 100 * air_deceleration * delta_time;
+            speed -= acceleration/50 * delta_time;
         else
             speed -= air_deceleration * delta_time;
 }
@@ -85,7 +82,7 @@ void Airplane::UpdateRotation(bool rotateRight, bool rotateLeft, bool rotateUp, 
     float acceleration_rotate = delta_time * (speed + 5) / 2;
     float delta_rotate_pitch = acceleration_rotate * (fabs(yaw) + 1) / 100;
     float delta_rotate_roll = acceleration_rotate * (fabs(roll) + 1) / 50;
-    float delta_rotate_yaw = acceleration_rotate * (fabs(pitch) + 1) / 100;
+    float delta_rotate_yaw = acceleration_rotate * (fabs(roll) + 1) / 50;
 
     // Aceleração e desaceleração
     const bool FLYING = Position.y > 0.1;
@@ -97,8 +94,8 @@ void Airplane::UpdateRotation(bool rotateRight, bool rotateLeft, bool rotateUp, 
     {
         if(roll > 0)
             yaw += delta_rotate_yaw;
-        else if(!FLYING)
-            yaw += 1/(50*pow(speed+2,2)); 
+        else if(!FLYING && speed > 0)
+            yaw += 1/(35*pow(speed+2,2)); 
         if(FLYING && roll < MAX_ROLL)
             roll += delta_rotate_roll;
     }
@@ -107,17 +104,17 @@ void Airplane::UpdateRotation(bool rotateRight, bool rotateLeft, bool rotateUp, 
     {
         if(roll < 0)
             yaw -= delta_rotate_yaw;
-        else if(!FLYING)
-            yaw -= 1/(50*pow(speed+2,2));
+        else if(!FLYING && speed > 0)
+            yaw -= 1/(35*pow(speed+2,2));
         if(FLYING && roll > -MAX_ROLL)
             roll -= delta_rotate_roll;
     }
 
-    if (rotateUp && FLYING && pitch >= -MAX_PITCH)
-        pitch -= delta_rotate_pitch;
-
-    if (rotateDown && FLYING && pitch <= MAX_PITCH)
+    if (rotateUp && FLYING && pitch <= MAX_PITCH)
         pitch += delta_rotate_pitch;
+
+    if (rotateDown && FLYING && pitch >= -MAX_PITCH)
+        pitch -= delta_rotate_pitch;
 
     if (!rotateRight && !rotateLeft)
         if(roll < MAX_ROLL+1 && roll > 0)
@@ -132,15 +129,15 @@ void Airplane::UpdateRotation(bool rotateRight, bool rotateLeft, bool rotateUp, 
         }
 
     if (!FLYING) {
-        if(pitch < MAX_PITCH+1 && pitch > 0)
-        {
-            pitch -= delta_rotate_pitch*2;
-            if(pitch < 0) pitch = 0;
-        }
-        else if(pitch > -MAX_PITCH-1 && pitch < 0)
+        if(pitch > -MAX_PITCH-1 && pitch < 0)
         {
             pitch += delta_rotate_pitch*2;
             if(pitch > 0) pitch = 0;
+        }
+        else if(pitch < MAX_PITCH+1 && pitch > 0)
+        {
+            pitch -= delta_rotate_pitch*2;
+            if(pitch < 0) pitch = 0;
         }
         if(roll < MAX_ROLL+1 && roll > 0)
         {

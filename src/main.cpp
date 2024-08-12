@@ -216,7 +216,7 @@ int main()
 
         Camera.Update(g_ScreenRatio, Airplane);
         Camera.Matrix(fov, nearPlane, farPlane, GpuProgram);
-        Airplane.Movimentation(keyPressedLeftShift, keyPressedA, keyPressedD, keyPressedS, keyPressedW, keyPressedLeftControl, deltaTime);
+        Airplane.Movimentation(keyPressedLeftShift, keyPressedD, keyPressedA, keyPressedS, keyPressedW, keyPressedLeftControl, deltaTime);
 
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(Airplane.Matrix));
         DrawCube(render_as_black_uniform);

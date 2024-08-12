@@ -12,9 +12,9 @@ void Camera::Update(float screenRatio, Airplane airplane)
 
 void Camera::Matrix(float fov, float nearPlane, float farPlane, Shader& shader)
 {
-	Position = Matrix_Rotate_Y(-yaw) * Matrix_Rotate_X(-pitch/1.8) * Matrix_Rotate_Z(-roll/1.8) * glm::vec4(0.0f,1.0f,distance,0.0f) + LookAt;
+	Position = Matrix_Rotate_Y(yaw) * Matrix_Rotate_X(pitch/1.8) * Matrix_Rotate_Z(roll/1.8) * glm::vec4(0.0f,1.0f,distance,0.0f) + LookAt;
 	View = LookAt - Position;
-	Up = Matrix_Rotate_Y(-yaw) * Matrix_Rotate_X(-pitch/1.8) * Matrix_Rotate_Z(-roll/1.8) * glm::vec4(0.0f,1.0f,-1.0f,0.0f);
+	Up = Matrix_Rotate_Y(yaw) * Matrix_Rotate_X(pitch/1.8) * Matrix_Rotate_Z(roll/1.8) * glm::vec4(0.0f,1.0f,-1.0f,0.0f);
 
 	ViewMatrix = Matrix_Camera_View(Position, View, Up);		
 	ProjectionMatrix = Matrix_Perspective(fov, screenRatio, nearPlane, farPlane);

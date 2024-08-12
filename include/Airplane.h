@@ -30,7 +30,7 @@ public:
 
     // Variáveis do ambiente
     float air_density = 1.225f;       // Densidade do ar ao nível do mar (kg/m^3)
-    const float gravity = -9.81f;            // Aceleração devido à gravidade (m/s^2)
+    const float gravity = 9.81f;            // Aceleração devido à gravidade (m/s^2)
 
     // Constantes do avião
     const float drag_coefficient = 0.025f;   // Coeficiente de arrasto ajustado para maior realismo
