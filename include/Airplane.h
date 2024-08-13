@@ -10,6 +10,7 @@
 #include<glm/gtx/vector_angle.hpp>
 
 #include"Matrices.h"
+#include"Inputs.h"
 
 class Airplane
 {
@@ -45,7 +46,7 @@ public:
     void UpdateAirDensity();
     
 
-    void Movimentation(bool accelerate, bool rotateRight, bool rotateLeft, bool rotateUp, bool rotateDown, bool brake, float deltaTime);
+    void Movimentation(Inputs inputs, float delta_time);
 
 };
 #endif

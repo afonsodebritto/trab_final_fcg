@@ -1,6 +1,6 @@
 #include "Airplane.h"
 
-void Airplane::Movimentation(bool accelerate, bool rotateRight, bool rotateLeft, bool rotateUp, bool rotateDown, bool brake, float delta_time)
+void Airplane::Movimentation(Inputs inputs, float delta_time)
 {
     // pitts special s2
     // 10m = 1m = 1.0f -> valores adaptados para essa restrição
@@ -11,8 +11,8 @@ void Airplane::Movimentation(bool accelerate, bool rotateRight, bool rotateLeft,
 
     // Sustentação (lift) que contrabalança a gravidade, mantendo o avião em voo
 
-    UpdateRotation(rotateRight, rotateLeft, rotateUp, rotateDown, delta_time);
-    UpdateSpeed(accelerate, brake, delta_time);
+    UpdateRotation(inputs.keyPressedD, inputs.keyPressedA, inputs.keyPressedS, inputs.keyPressedW, delta_time);
+    UpdateSpeed(inputs.keyPressedLeftShift, inputs.keyPressedLeftControl, delta_time);
     UpdateAirDensity();
 
     
@@ -80,7 +80,7 @@ void Airplane::UpdateSpeed(bool accelerate, bool brake, float delta_time)
 void Airplane::UpdateRotation(bool rotateRight, bool rotateLeft, bool rotateUp, bool rotateDown, float delta_time)
 {
     float acceleration_rotate = delta_time * (speed + 5) / 2;
-    float delta_rotate_pitch = acceleration_rotate * (fabs(yaw) + 1) / 100;
+    float delta_rotate_pitch = acceleration_rotate * (fabs(pitch) + 1) / 100;
     float delta_rotate_roll = acceleration_rotate * (fabs(roll) + 1) / 50;
     float delta_rotate_yaw = acceleration_rotate * (fabs(roll) + 1) / 50;
 

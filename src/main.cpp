@@ -24,6 +24,7 @@
 #include "shaderClass.h"
 #include "Camera.h"
 #include "Airplane.h"
+#include "Inputs.h"
 
 // Declaração de várias funções utilizadas em main().  Essas estão definidas
 // logo após a definição de main() neste arquivo.
@@ -82,19 +83,15 @@ float lastFrame = 0.0f; // Time of last frame
 bool g_LeftMouseButtonPressed = false;
 
 // Variáveis para controlar se uma tecla está pressionada
-bool keyPressedW = false;
-bool keyPressedA = false;
-bool keyPressedS = false;
-bool keyPressedD = false;
-bool keyPressedLeftShift = false;
-bool keyPressedLeftControl = false;
+
+Inputs g_Inputs;
 
 // Variáveis que definem a câmera em coordenadas esféricas, controladas pelo
 // usuário através do mouse (veja função CursorPosCallback()). A posição
 // efetiva da câmera é calculada dentro da função main(), dentro do loop de
 // renderização.
-float g_CameraTheta = 5*PI/4; // Ângulo no plano ZX em relação ao eixo Z
-float g_CameraPhi = -PI/6.0f;   // Ângulo em relação ao eixo Y
+float g_freeCameraPitch = 0.0f; // Ângulo no plano ZX em relação ao eixo Z
+float g_freeCameraYaw = 0.0f;   // Ângulo em relação ao eixo Y
 float g_CameraDistance = 2.5f; // Distância da câmera para a origem
 
 // Variável que controla se o texto informativo será mostrado na tela.
@@ -191,9 +188,12 @@ int main()
     Airplane Airplane(glm::vec4(0.0f,0.0f,0.0f,1.0f), 0.0f, 0.0f, 0.0f, 10.0f, 50.0f);
     Camera Camera;
 
+    bool cameraType = LOOKAT_CAMERA;
+
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
     {
+        
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glUseProgram(GpuProgram.ID);
@@ -214,9 +214,23 @@ int main()
         float farPlane  = -2000.0f; // Posição do "far plane"
         float fov = PI / 3.0f;
 
-        Camera.Update(g_ScreenRatio, Airplane);
-        Camera.Matrix(fov, nearPlane, farPlane, GpuProgram);
-        Airplane.Movimentation(keyPressedLeftShift, keyPressedD, keyPressedA, keyPressedS, keyPressedW, keyPressedLeftControl, deltaTime);
+        glfwGetCursorPos(window, &g_Inputs.cursorXPos, &g_Inputs.cursorXPos);
+
+        if(g_Inputs.keyPressedSpace)
+            cameraType = FREE_CAMERA;
+        else
+            cameraType = LOOKAT_CAMERA;
+
+        Camera.Update(g_ScreenRatio, Airplane, g_Inputs, cameraType);
+        Camera.Matrix(fov, nearPlane, farPlane, GpuProgram, deltaTime);
+
+        if(!g_Inputs.keyPressedSpace)
+            Airplane.Movimentation(g_Inputs, deltaTime);
+        else
+        {
+            g_freeCameraPitch = Airplane.pitch;
+            g_freeCameraYaw = Airplane.yaw;
+        }
 
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(Airplane.Matrix));
         DrawCube(render_as_black_uniform);
@@ -622,19 +636,28 @@ void CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
     float dx = xpos - g_LastCursorPosX;
     float dy = ypos - g_LastCursorPosY;
 
-    // Atualizamos parâmetros da câmera com os deslocamentos
-    g_CameraTheta -= 0.01f*dx;
-    g_CameraPhi   -= 0.01f*dy;
+    // // Atualizamos parâmetros da câmera com os deslocamentos
+    // g_freeCameraPitch -= 0.01f*dx;
+    // g_freeCameraYaw   -= 0.01f*dy;
 
-    // Em coordenadas esféricas, o ângulo phi deve ficar entre -pi/2 e +pi/2.
-    float phimax = PI/2;
-    float phimin = -phimax;
+    // // Em coordenadas esféricas, o ângulo phi deve ficar entre -pi/2 e +pi/2.
+    // float yawmax = M_PI/2;
+    // float yawmin = -yawmax;
 
-    if (g_CameraPhi > phimax)
-        g_CameraPhi = phimax;
+    // float pitchmax = M_PI;
+    // float pitchmin = -pitchmax;
 
-    if (g_CameraPhi < phimin)
-        g_CameraPhi = phimin;
+    // if (g_freeCameraYaw > yawmax)
+    //     g_freeCameraYaw = yawmax;
+
+    // if (g_freeCameraYaw < yawmin)
+    //     g_freeCameraYaw = yawmin;
+
+    // if (g_freeCameraPitch > pitchmax)
+    //     g_freeCameraPitch = pitchmax;
+
+    // if (g_freeCameraPitch < pitchmin)
+    //     g_freeCameraPitch = pitchmin;
 
     // Atualizamos as variáveis globais para armazenar a posição atual do
     // cursor como sendo a última posição conhecida do cursor.
@@ -676,17 +699,19 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
         glfwSetWindowShouldClose(window, GL_TRUE);
 
     if (key == GLFW_KEY_W)
-        keyPressedW = (action != GLFW_RELEASE);
+        g_Inputs.keyPressedW = (action != GLFW_RELEASE);
     if (key == GLFW_KEY_A)
-        keyPressedA = (action != GLFW_RELEASE);
+        g_Inputs.keyPressedA = (action != GLFW_RELEASE);
     if (key == GLFW_KEY_S)
-        keyPressedS = (action != GLFW_RELEASE);
+        g_Inputs.keyPressedS = (action != GLFW_RELEASE);
     if (key == GLFW_KEY_D)
-        keyPressedD = (action != GLFW_RELEASE);
+        g_Inputs.keyPressedD = (action != GLFW_RELEASE);
     if (key == GLFW_KEY_LEFT_SHIFT)
-        keyPressedLeftShift = (action != GLFW_RELEASE);
+        g_Inputs.keyPressedLeftShift = (action != GLFW_RELEASE);
     if (key == GLFW_KEY_LEFT_CONTROL)
-        keyPressedLeftControl = (action != GLFW_RELEASE);
+        g_Inputs.keyPressedLeftControl = (action != GLFW_RELEASE);
+    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+        g_Inputs.keyPressedSpace = !g_Inputs.keyPressedSpace;
 
 
     // Se o usuário apertar a tecla H, fazemos um "toggle" do texto informativo mostrado na tela.
@@ -703,7 +728,7 @@ void ErrorCallback(int error, const char* description)
 }
 
 // Escrevemos na tela os ângulos de Euler definidos nas variáveis globais
-// g_CameraTheta, g_CameraPhi, e g_CameraDistance.
+// g_freeCameraPitch, g_freeCameraYaw, e g_CameraDistance.
 void TextRendering_ShowEulerAngles(GLFWwindow* window, float yaw, float pitch)
 {
     if ( !g_ShowInfoText )
