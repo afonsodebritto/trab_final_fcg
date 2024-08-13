@@ -20,6 +20,7 @@ void Camera::LookatUpdate(float screenRatio, Airplane& airplane)
 void Camera::FreeUpdate(float screenRatio, Inputs inputs)
 {
 	Camera::inputs = inputs;
+	Camera::screenRatio = screenRatio;
 	initializationLookatCamera = true;
 	if(initializationFreeCamera)
 	{
