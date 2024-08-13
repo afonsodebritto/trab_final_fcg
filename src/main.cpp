@@ -185,7 +185,7 @@ int main()
     glm::mat4 the_model;
     glm::mat4 the_view;
 
-    Airplane Airplane(glm::vec4(0.0f,0.0f,0.0f,1.0f), 0.0f, 0.0f, 0.0f, 10.0f, 50.0f);
+    Airplane Airplane(glm::vec4(0.0f,0.0f,0.0f,1.0f), 10.0f, 50.0f);
     Camera Camera;
 
     bool cameraType = LOOKAT_CAMERA;

@@ -165,12 +165,12 @@ void Airplane::UpdateRotation(bool rotateRight, bool rotateLeft, bool rotateUp, 
     else if (roll < -M_PI) roll += 2 * M_PI;
 }
 
-Airplane::Airplane(glm::vec4 position, float pitch, float yaw, float roll, float acceleration, float max_speed)
+Airplane::Airplane(glm::vec4 position, float acceleration, float max_speed)
 {
     Airplane::Position = position;
-    Airplane::pitch = pitch;
-    Airplane::yaw = yaw;
-    Airplane::roll = roll;
+    Airplane::pitch = 0.0f;
+    Airplane::yaw = 0.0f;
+    Airplane::roll = 0.0f;
     Airplane::acceleration = acceleration;
     Airplane::max_speed = max_speed;
     Airplane::speed = 0.0f;  // Inicializa a velocidade do avião em 0

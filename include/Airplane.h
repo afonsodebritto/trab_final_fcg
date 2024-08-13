@@ -40,8 +40,8 @@ public:
     const float mass = 743.0f;               // Massa do avião (kg)
 
 
-	Airplane(glm::vec4 position, float pitch, float yaw, float roll, float acceleration, float max_speed);
-    void UpdateRotation(bool rotateRight, bool rotateLeft, bool rotateUp, bool rotateDown,  float delta_time);
+	Airplane(glm::vec4 position, float acceleration, float max_speed);
+    void UpdateRotation(bool rotateRight, bool rotateLeft, bool rotateUp, bool rotateDown, float delta_time);
     void UpdateSpeed(bool accelerate, bool brake, float delta_time);
     void UpdateAirDensity();
     
