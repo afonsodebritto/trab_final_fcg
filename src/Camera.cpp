@@ -69,13 +69,12 @@ void Camera::FreeMatrix(float fov, float nearPlane, float farPlane, Shader& shad
 
 	View = -glm::vec4(x,y,z,0.0f);
 
-	UpdateAngles(deltaTime);
-
 	if(roll != 0)
 		Up = Matrix_Rotate_Y(airplane->yaw) * Matrix_Rotate_X(airplane->pitch/1.8) * Matrix_Rotate_Z(roll/1.8 ) * glm::vec4(0.0f,1.0f,0.0f,0.0f);
 	else
 		Up = glm::vec4(0.0f,1.0f,0.0f,0.0f);
 
+	UpdateAngles(deltaTime);
 	UpdatePosition(deltaTime);
 }
 

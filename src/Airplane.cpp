@@ -2,6 +2,7 @@
 
 void Airplane::Movimentation(Inputs inputs, float delta_time)
 {
+    if(speed<0) speed = 0;
     // pitts special s2
     // 10m = 1m = 1.0f -> valores adaptados para essa restrição
     // Atualiza a direção do avião considerando as rotações atuais
@@ -185,7 +186,7 @@ void Airplane::UpdateAirDensity()
     float R = 287.05f;     // Constante específica do ar (J/(kg*K))
 
     // Cálculo da densidade
-    float T = T_0 - L * (Position.y*10);
+    float T = T_0 - L * (Position.y);
     float expoente = (g / (R * L)) - 1;
     float rho = rho_0 * pow((T / T_0), expoente);
 
