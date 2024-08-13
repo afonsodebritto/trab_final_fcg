@@ -7,7 +7,7 @@ void Airplane::Movimentation(Inputs inputs, float delta_time)
     // Atualiza a direção do avião considerando as rotações atuais
     Direction = Matrix_Rotate_Y(yaw) * Matrix_Rotate_X(pitch) * Matrix_Rotate_Z(roll) * glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
     Direction = Direction / norm(Direction);
-    const bool FLYING = Position.y > 0.1;
+    const bool FLYING = Position.y > 0;
 
     // Sustentação (lift) que contrabalança a gravidade, mantendo o avião em voo
 
@@ -56,7 +56,7 @@ void Airplane::UpdateSpeed(bool accelerate, bool brake, float delta_time)
     float drag_force = 0.5f * drag_coefficient * air_density * pow(speed, 2) * reference_area;
     float air_deceleration = drag_force / mass;
 
-    const bool FLYING = Position.y > 0.1;
+    const bool FLYING = Position.y > 0;
 
     if (accelerate && speed < max_speed)
         if(!FLYING)
@@ -85,7 +85,7 @@ void Airplane::UpdateRotation(bool rotateRight, bool rotateLeft, bool rotateUp, 
     float delta_rotate_yaw = acceleration_rotate * (fabs(roll) + 1) / 50;
 
     // Aceleração e desaceleração
-    const bool FLYING = Position.y > 0.1;
+    const bool FLYING = Position.y > 0;
     const float MAX_ROLL = M_PI/3;
     const float MAX_PITCH = M_PI/3;
 

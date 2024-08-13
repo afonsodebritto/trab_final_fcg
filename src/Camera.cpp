@@ -19,22 +19,18 @@ void Camera::LookatUpdate(float screenRatio, Airplane& airplane)
 
 void Camera::FreeUpdate(float screenRatio, Inputs inputs)
 {
+	Camera::inputs = inputs;
 	initializationLookatCamera = true;
 	if(initializationFreeCamera)
 	{
 		float r = norm(View);
-		Camera::yaw = acos(View.y/r) -M_PI/2;
-		Camera::pitch = atan2(-View.z, View.x) - M_PI/2;
+		Camera::pitch = acos(View.y/r) -M_PI/2;
+		Camera::yaw = atan2(-View.z, View.x) - M_PI/2;
 		Camera::roll = airplane->roll;
-		Camera::cursorXPos = inputs.cursorXPos;
-		Camera::cursorYPos = inputs.cursorYPos;
+		Camera::lastCursorXPos = inputs.cursorXPos;
+		Camera::lastCursorYPos = inputs.cursorYPos;
 		initializationFreeCamera = false;
 	}
-	Camera::lastCursorXPos = Camera::cursorXPos;
-	Camera::lastCursorYPos = Camera::cursorYPos;
-	Camera::cursorXPos = cursorXPos;
-	Camera::cursorYPos = cursorYPos;
-	Camera::inputs = inputs;
 }
 
 void Camera::Matrix(float fov, float nearPlane, float farPlane, Shader& shader, float deltaTime)
@@ -67,9 +63,9 @@ void Camera::FreeMatrix(float fov, float nearPlane, float farPlane, Shader& shad
 {
 	float cameraSpeed = 10 * deltaTime;
 
-	float y = sin(yaw);
-	float z = cos(yaw)*cos(pitch);
-	float x = cos(yaw)*sin(pitch);
+	float y = sin(pitch);
+	float z = cos(pitch)*cos(yaw);
+	float x = cos(pitch)*sin(yaw);
 
 	View = -glm::vec4(x,y,z,0.0f);
 
@@ -85,20 +81,20 @@ void Camera::FreeMatrix(float fov, float nearPlane, float farPlane, Shader& shad
 
 void Camera::UpdateAngles(float deltaTime)
 {
-	float dx = cursorXPos - lastCursorXPos;
-    float dy = cursorYPos - lastCursorYPos;
+	float dx = inputs.cursorXPos - lastCursorXPos;
+    float dy = inputs.cursorYPos - lastCursorYPos;
 
-    pitch -= deltaTime*dx/2;
-    yaw   += deltaTime*dy/2;
+    yaw -= deltaTime*dx/2;
+    pitch   += deltaTime*dy/2;
 
-    float yawmax = M_PI/2;
-    float yawmin = -yawmax;
+    float pitchMax = M_PI/2;
+    float pitchMin = -pitchMax;
 
-    if (yaw > yawmax)
-        yaw = yawmax;
+    if (pitch > pitchMax)
+        pitch = pitchMax;
 
-    if (yaw < yawmin)
-        yaw = yawmin;
+    if (pitch < pitchMin)
+        pitch = pitchMin;
 
 	if(roll > 0)
 	{
@@ -111,15 +107,17 @@ void Camera::UpdateAngles(float deltaTime)
 		if(roll > 0) roll = 0;
 	}
 
-	pitch = fmod(pitch, 2 * M_PI);
-    if (pitch > M_PI) pitch -= 2 * M_PI;
-    else if (pitch < -M_PI) pitch += 2 * M_PI;
+	yaw = fmod(yaw, 2 * M_PI);
+    if (yaw > M_PI) yaw -= 2 * M_PI;
+    else if (yaw < -M_PI) yaw += 2 * M_PI;
+
+	lastCursorXPos = inputs.cursorXPos;
+	lastCursorYPos = inputs.cursorYPos;
 }
 
 void Camera::UpdatePosition(float deltaTime)
 {
 	float speed = 10 * deltaTime;
-	printf("oi");
 
 	glm::vec4 w = -View;
     glm::vec4 u = crossproduct(Up,w);
@@ -134,4 +132,7 @@ void Camera::UpdatePosition(float deltaTime)
 		Position += w*speed;
 	if(inputs.keyPressedD)
 		Position += u*speed;
+	
+	if(Position.y < 0)
+		Position.y = 0;
 }

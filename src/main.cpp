@@ -207,14 +207,13 @@ int main()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-
         // Note que, no sistema de coordenadas da câmera, os planos near e far
         // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.   pdf.
         float nearPlane = -0.1f;  // Posição do "near plane"
         float farPlane  = -2000.0f; // Posição do "far plane"
         float fov = PI / 3.0f;
 
-        glfwGetCursorPos(window, &g_Inputs.cursorXPos, &g_Inputs.cursorXPos);
+        glfwGetCursorPos(window, &g_Inputs.cursorXPos, &g_Inputs.cursorYPos);
 
         if(g_Inputs.keyPressedSpace)
             cameraType = FREE_CAMERA;
