@@ -24,6 +24,7 @@
 #include "shaderClass.h"
 #include "Camera.h"
 #include "Airplane.h"
+#include "Inputs.h"
 
 // Declaração de várias funções utilizadas em main().  Essas estão definidas
 // logo após a definição de main() neste arquivo.
@@ -38,8 +39,9 @@ void TextRendering_PrintString(GLFWwindow* window, const std::string &str, float
 
 // Funções abaixo renderizam como texto na janela OpenGL algumas matrizes e
 // outras informações do programa. Definidas após main().
-void TextRendering_ShowEulerAngles(GLFWwindow* window, float rotationAngleZ, float rotationAngleX);
+void TextRendering_ShowEulerAngles(GLFWwindow* window, float yaw, float pitch);
 void TextRendering_ShowFramesPerSecond(GLFWwindow* window);
+void TextRendering_ShowAirplaneData(GLFWwindow* window, Airplane& airplane);
 
 // Funções callback para comunicação com o sistema operacional e interação do
 // usuário. Veja mais comentários nas definições das mesmas, abaixo.
@@ -47,8 +49,6 @@ void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 void ErrorCallback(int error, const char* description);
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
-void CursorPosCallback(GLFWwindow* window, double xpos, double ypos);
-void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
 // Definimos uma estrutura que armazenará dados necessários para renderizar
 // cada objeto da cena virtual.
@@ -59,43 +59,17 @@ struct SceneObject
     int          num_indices; // Número de índices do objeto dentro do vetor indices[] definido em BuildTriangles()
     GLenum       rendering_mode; // Modo de rasterização (GL_TRIANGLES, GL_TRIANGLE_STRIP, etc.)
 };
-
-// Abaixo definimos variáveis globais utilizadas em várias funções do código.
-
-const float PI = 3.141592;
 // A cena virtual é uma lista de objetos nomeados, guardados em um dicionário
 // (map).  Veja dentro da função BuildTriangles() como que são incluídos
 // objetos dentro da variável g_VirtualScene, e veja na função main() como
 // estes são acessados.
 std::map<const char*, SceneObject> g_VirtualScene;
 
-// Razão de proporção da janela (largura/altura). Veja função FramebufferSizeCallback().
 float g_ScreenRatio = 1.0f;
 
-// Ângulos de Euler que controlam a rotação de um dos cubos da cena virtual
-
-float deltaTime = 0.0f;	// Time between current frame and last frame
-float lastFrame = 0.0f; // Time of last frame
-
-// "g_LeftMouseButtonPressed = true" se o usuário está com o botão esquerdo do mouse
-// pressionado no momento atual. Veja função MouseButtonCallback().
-bool g_LeftMouseButtonPressed = false;
-
 // Variáveis para controlar se uma tecla está pressionada
-bool keyPressedW = false;
-bool keyPressedA = false;
-bool keyPressedS = false;
-bool keyPressedD = false;
-bool keyPressedLeftShift = false;
-bool keyPressedLeftControl = false;
 
-// Variáveis que definem a câmera em coordenadas esféricas, controladas pelo
-// usuário através do mouse (veja função CursorPosCallback()). A posição
-// efetiva da câmera é calculada dentro da função main(), dentro do loop de
-// renderização.
-float g_CameraTheta = 5*PI/4; // Ângulo no plano ZX em relação ao eixo Z
-float g_CameraPhi = -PI/6.0f;   // Ângulo em relação ao eixo Y
-float g_CameraDistance = 2.5f; // Distância da câmera para a origem
+Inputs g_Inputs;
 
 // Variável que controla se o texto informativo será mostrado na tela.
 bool g_ShowInfoText = true;
@@ -130,8 +104,6 @@ int main()
 
     glfwSetKeyCallback(window, KeyCallback);
     glfwSetMouseButtonCallback(window, MouseButtonCallback);
-    glfwSetCursorPosCallback(window, CursorPosCallback);
-    glfwSetScrollCallback(window, ScrollCallback);
 
     // Definimos a função de callback que será chamada sempre que a janela for
     // redimensionada, por consequência alterando o tamanho do "framebuffer"
@@ -187,13 +159,23 @@ int main()
     glm::mat4 the_projection;
     glm::mat4 the_model;
     glm::mat4 the_view;
+    glm::mat4 model;
 
-    Airplane Airplane(glm::vec4(0.0f,0.0f,0.0f,1.0f), 0.0f, 0.0f, 2.0f, 12.0f);
+    Airplane Airplane(glm::vec4(0.0f,0.0f,0.0f,1.0f), 10.0f, 50.0f);
+
+    float nearPlane = -0.1f;
+    float farPlane  = -2000.0f;
+    float fov = M_PI / 3.0f;
     Camera Camera;
+
+    bool cameraType = LOOKAT_CAMERA;
+
+    float deltaTime, lastFrame, currentFrame;
 
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
     {
+        
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glUseProgram(GpuProgram.ID);
@@ -203,28 +185,28 @@ int main()
         // comentários detalhados dentro da definição de BuildTriangles().
         glBindVertexArray(vertex_array_object_id);
 
-        float currentFrame = glfwGetTime();
+        currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
+        glfwGetCursorPos(window, &g_Inputs.cursorXPos, &g_Inputs.cursorYPos);
 
-        // Note que, no sistema de coordenadas da câmera, os planos near e far
-        // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.   pdf.
-        float nearPlane = -0.1f;  // Posição do "near plane"
-        float farPlane  = -2000.0f; // Posição do "far plane"
-        float fov = PI / 3.0f;
+        if(g_Inputs.keyPressedSpace)
+            cameraType = FREE_CAMERA;
+        else
+            cameraType = LOOKAT_CAMERA;
 
-        Camera.Update(g_ScreenRatio, Airplane.Position, Airplane.rotationAngleX, Airplane.rotationAngleZ, 6.0f);
-        Camera.Matrix(fov, nearPlane, farPlane, GpuProgram);
-        Airplane.Movimentation(keyPressedLeftShift, keyPressedA, keyPressedD, keyPressedS, keyPressedW, keyPressedLeftControl, deltaTime);
+        Camera.Update(g_ScreenRatio, Airplane, g_Inputs, cameraType);
+        Camera.Matrix(fov, nearPlane, farPlane, GpuProgram, deltaTime);
 
-        printf("speed: %f\n", Airplane.speed);
-        printf("pos: %f\n", Airplane.Position.y);
+        if(cameraType == LOOKAT_CAMERA)
+            Airplane.Movimentation(g_Inputs, deltaTime);
+
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(Airplane.Matrix));
         DrawCube(render_as_black_uniform);
 
 
-        glm::mat4 model = Matrix_Translate(0.0f, -1.0f, 0.0f) * Matrix_Scale(1000.0f,0.0f, 1000.0f);
+        model = Matrix_Translate(0.0f, -1.0f, 0.0f) * Matrix_Scale(1000.0f,0.0f, 1000.0f);
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
         DrawCube(render_as_black_uniform);
 
@@ -261,27 +243,12 @@ int main()
         );
         glBindVertexArray(0);
 
-
-        // Imprimimos na tela os ângulos de Euler que controlam a rotação do
-        // terceiro cubo.
-        TextRendering_ShowEulerAngles(window, Airplane.rotationAngleZ, Airplane.rotationAngleX);
-
-        // Imprimimos na tela informação sobre o número de quadros renderizados
-        // por segundo (frames per second).
         TextRendering_ShowFramesPerSecond(window);
 
-        // O framebuffer onde OpenGL executa as operações de renderização não
-        // é o mesmo que está sendo mostrado para o usuário, caso contrário
-        // seria possível ver artefatos conhecidos como "screen tearing". A
-        // chamada abaixo faz a troca dos buffers, mostrando para o usuário
-        // tudo que foi renderizado pelas funções acima.
-        // Veja o link: https://en.wikipedia.org/w/index.php?title=Multiple_buffering&oldid=793452829#Double_buffering_in_computer_graphics
+        TextRendering_ShowAirplaneData(window, Airplane);
+
         glfwSwapBuffers(window);
 
-        // Verificamos com o sistema operacional se houve alguma interação do
-        // usuário (teclado, mouse, ...). Caso positivo, as funções de callback
-        // definidas anteriormente usando glfwSet*Callback() serão chamadas
-        // pela biblioteca GLFW.
         glfwPollEvents();
     }
 
@@ -581,84 +548,9 @@ void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
     g_ScreenRatio = (float)width / height;
 }
 
-// Variáveis globais que armazenam a última posição do cursor do mouse, para
-// que possamos calcular quanto que o mouse se movimentou entre dois instantes
-// de tempo. Utilizadas no callback CursorPosCallback() abaixo.
-double g_LastCursorPosX, g_LastCursorPosY;
-
 // Função callback chamada sempre que o usuário aperta algum dos botões do mouse
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 {
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
-    {
-        // Se o usuário pressionou o botão esquerdo do mouse, guardamos a
-        // posição atual do cursor nas variáveis g_LastCursorPosX e
-        // g_LastCursorPosY.  Também, setamos a variável
-        // g_LeftMouseButtonPressed como true, para saber que o usuário está
-        // com o botão esquerdo pressionado.
-        glfwGetCursorPos(window, &g_LastCursorPosX, &g_LastCursorPosY);
-        g_LeftMouseButtonPressed = true;
-    }
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
-    {
-        // Quando o usuário soltar o botão esquerdo do mouse, atualizamos a
-        // variável abaixo para false.
-        g_LeftMouseButtonPressed = false;
-    }
-}
-
-// Função callback chamada sempre que o usuário movimentar o cursor do mouse em
-// cima da janela OpenGL.
-void CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
-{
-    // Abaixo executamos o seguinte: caso o botão esquerdo do mouse esteja
-    // pressionado, computamos quanto que o mouse se movimento desde o último
-    // instante de tempo, e usamos esta movimentação para atualizar os
-    // parâmetros que definem a posição da câmera dentro da cena virtual.
-    // Assim, temos que o usuário consegue controlar a câmera.
-
-    if (!g_LeftMouseButtonPressed)
-        return;
-
-    // Deslocamento do cursor do mouse em x e y de coordenadas de tela!
-    float dx = xpos - g_LastCursorPosX;
-    float dy = ypos - g_LastCursorPosY;
-
-    // Atualizamos parâmetros da câmera com os deslocamentos
-    g_CameraTheta -= 0.01f*dx;
-    g_CameraPhi   -= 0.01f*dy;
-
-    // Em coordenadas esféricas, o ângulo phi deve ficar entre -pi/2 e +pi/2.
-    float phimax = PI/2;
-    float phimin = -phimax;
-
-    if (g_CameraPhi > phimax)
-        g_CameraPhi = phimax;
-
-    if (g_CameraPhi < phimin)
-        g_CameraPhi = phimin;
-
-    // Atualizamos as variáveis globais para armazenar a posição atual do
-    // cursor como sendo a última posição conhecida do cursor.
-    g_LastCursorPosX = xpos;
-    g_LastCursorPosY = ypos;
-}
-
-// Função callback chamada sempre que o usuário movimenta a "rodinha" do mouse.
-void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
-{
-    // Atualizamos a distância da câmera para a origem utilizando a
-    // movimentação da "rodinha", simulando um ZOOM.
-    g_CameraDistance -= 0.1f*yoffset;
-
-    // Uma câmera look-at nunca pode estar exatamente "em cima" do ponto para
-    // onde ela está olhando, pois isto gera problemas de divisão por zero na
-    // definição do sistema de coordenadas da câmera. Isto é, a variável abaixo
-    // nunca pode ser zero. Versões anteriores deste código possuíam este bug,
-    // o qual foi detectado pelo aluno Vinicius Fraga (2017/2).
-    const float verysmallnumber = std::numeric_limits<float>::epsilon();
-    if (g_CameraDistance < verysmallnumber)
-        g_CameraDistance = verysmallnumber;
 }
 
 // Definição da função que será chamada sempre que o usuário pressionar alguma
@@ -678,17 +570,19 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
         glfwSetWindowShouldClose(window, GL_TRUE);
 
     if (key == GLFW_KEY_W)
-        keyPressedW = (action != GLFW_RELEASE);
+        g_Inputs.keyPressedW = (action != GLFW_RELEASE);
     if (key == GLFW_KEY_A)
-        keyPressedA = (action != GLFW_RELEASE);
+        g_Inputs.keyPressedA = (action != GLFW_RELEASE);
     if (key == GLFW_KEY_S)
-        keyPressedS = (action != GLFW_RELEASE);
+        g_Inputs.keyPressedS = (action != GLFW_RELEASE);
     if (key == GLFW_KEY_D)
-        keyPressedD = (action != GLFW_RELEASE);
+        g_Inputs.keyPressedD = (action != GLFW_RELEASE);
     if (key == GLFW_KEY_LEFT_SHIFT)
-        keyPressedLeftShift = (action != GLFW_RELEASE);
+        g_Inputs.keyPressedLeftShift = (action != GLFW_RELEASE);
     if (key == GLFW_KEY_LEFT_CONTROL)
-        keyPressedLeftControl = (action != GLFW_RELEASE);
+        g_Inputs.keyPressedLeftControl = (action != GLFW_RELEASE);
+    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+        g_Inputs.keyPressedSpace = !g_Inputs.keyPressedSpace;
 
 
     // Se o usuário apertar a tecla H, fazemos um "toggle" do texto informativo mostrado na tela.
@@ -705,8 +599,8 @@ void ErrorCallback(int error, const char* description)
 }
 
 // Escrevemos na tela os ângulos de Euler definidos nas variáveis globais
-// g_CameraTheta, g_CameraPhi, e g_CameraDistance.
-void TextRendering_ShowEulerAngles(GLFWwindow* window, float rotationAngleZ, float rotationAngleX)
+// g_freeCameraPitch, g_freeCameraYaw, e g_CameraDistance.
+void TextRendering_ShowEulerAngles(GLFWwindow* window, float yaw, float pitch)
 {
     if ( !g_ShowInfoText )
         return;
@@ -714,7 +608,7 @@ void TextRendering_ShowEulerAngles(GLFWwindow* window, float rotationAngleZ, flo
     float pad = TextRendering_LineHeight(window);
 
     char buffer[80];
-    snprintf(buffer, 80, "Euler Angles rotation matrix = Z(%.2f)*Y(%.2f)*X(%.2f)\n", rotationAngleZ, 0.0, rotationAngleX);
+    snprintf(buffer, 80, "Euler Angles rotation matrix = Z(%.2f)*Y(%.2f)*X(%.2f)\n", yaw, 0.0, pitch);
 
     TextRendering_PrintString(window, buffer, -1.0f+pad/10, -1.0f+2*pad/10, 1.0f);
 }
@@ -730,7 +624,7 @@ void TextRendering_ShowFramesPerSecond(GLFWwindow* window)
     // subsequentes da função!
     static float old_seconds = (float)glfwGetTime();
     static int   ellapsed_frames = 0;
-    static char  buffer[20] = "?? fps";
+    static char  buffer[20] = "??? fps";
     static int   numchars = 7;
 
     ellapsed_frames += 1;
@@ -754,6 +648,38 @@ void TextRendering_ShowFramesPerSecond(GLFWwindow* window)
 
     TextRendering_PrintString(window, buffer, 1.0f-(numchars + 1)*charwidth, 1.0f-lineheight, 1.0f);
 }
+
+void TextRendering_ShowAirplaneData(GLFWwindow* window, Airplane& airplane)
+{
+    if ( !g_ShowInfoText )
+        return;
+
+    // Variáveis estáticas (static) mantém seus valores entre chamadas
+    // subsequentes da função!
+    static char  bufferSpeed[20] = "0.00 km/h";
+    static int   numcharsSpeed = 17;
+    static char  bufferAltitude[20] = "0.00 m";
+    static int   numcharsAltitude = 17;
+    static char  bufferPitch[20] = "0.00 deg";
+    static int   numcharsPitch = 16;
+
+
+    numcharsSpeed = snprintf(bufferSpeed, 20, "%.2f km/h", fabs(airplane.speed)*3.6f);
+    
+    numcharsAltitude = snprintf(bufferAltitude, 20, "%.2f m", airplane.Position.y);
+    
+    numcharsPitch = snprintf(bufferPitch, 20, "%.2f deg", airplane.pitch*180/M_PI);
+
+    float lineheight = TextRendering_LineHeight(window);
+    float charwidth = TextRendering_CharWidth(window);
+    
+    TextRendering_PrintString(window, bufferAltitude, -1.0f+charwidth, 1.0f-2*lineheight, 1.0f);
+
+    TextRendering_PrintString(window, bufferSpeed, -1.0f+charwidth, 1.0f-lineheight, 1.0f);
+
+    TextRendering_PrintString(window, bufferPitch, -1.0f+charwidth, 1.0f-3*lineheight, 1.0f);
+}
+
 
 // set makeprg=cd\ ..\ &&\ make\ run\ >/dev/null
 // vim: set spell spelllang=pt_br :

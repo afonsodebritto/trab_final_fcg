@@ -8,28 +8,50 @@
 
 #include"shaderClass.h"
 #include"Matrices.h"
+#include"Airplane.h"
+#include"Inputs.h"
+
+#define FREE_CAMERA 1
+#define LOOKAT_CAMERA 0
 
 class Camera
 {
 public:
 	// Stores the main vectors of the camera
 	glm::vec4 Position;
-	glm::vec4 LookAt;
 	glm::vec4 Up;
 	glm::vec4 View;
 	glm::mat4 ViewMatrix;
 	glm::mat4 ProjectionMatrix;
 
-	// Stores the width and height of the window
 	float screenRatio;
-	float rotationAngleX;
-	float distance;
-	float rotationAngleZ;
+	Airplane *airplane;
 
+	bool type;
 
+	bool initializationFreeCamera = true;
+	bool initializationLookatCamera = true;
+	float cursorXPos;
+	float cursorYPos;
+	float lastCursorXPos;
+	float lastCursorYPos;
+	float yaw;
+	float pitch;
+	float roll;
 
-	void Update(float screenRatio, glm::vec4 lookat, float rotationAngleX, float rotationAngleZ, float distance);
-	// Updates and exports the camera matrix to the Vertex Shader
-	void Matrix(float fov, float nearPlane, float farPlane, Shader& shader);
+	Inputs inputs;
+
+	void Update(float screenRatio, Airplane& airplane, Inputs inputs, bool cameraType);
+	void Matrix(float fov, float nearPlane, float farPlane, Shader& shader, float deltaTime);
+	
+private:
+	void LookatUpdate(float screenRatio, Airplane& airplane);
+	void FreeUpdate(float screenRatio, Inputs inputs);
+
+	void LookatMatrix(float fov, float nearPlane, float farPlane, Shader& shader, float deltaTime);
+	void FreeMatrix(float fov, float nearPlane, float farPlane, Shader& shader, float deltaTime);
+
+	void UpdateAngles(float deltaTime);
+	void UpdatePosition(float deltaTime);
 };
 #endif
