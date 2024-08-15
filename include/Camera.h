@@ -30,7 +30,8 @@ public:
 	bool type;
 
 	bool initializationFreeCamera = true;
-	bool initializationLookatCamera = true;
+	bool initializationLookatCamera = false;
+	bool movingThroughBezierCurve = false;
 	float cursorXPos;
 	float cursorYPos;
 	float lastCursorXPos;
@@ -40,6 +41,15 @@ public:
 	float roll;
 
 	Inputs inputs;
+
+	// Bezier Variables
+
+	glm::vec4 bezierInicial;
+	glm::vec4 bezierFinal;
+	glm::vec4 bezierP1;
+	glm::vec4 bezierP2;
+	float bezierTime = 0.0f;
+	float bezierDistance;
 
 	void Update(float screenRatio, Airplane& airplane, Inputs inputs, bool cameraType);
 	void Matrix(float fov, float nearPlane, float farPlane, Shader& shader, float deltaTime);
@@ -51,7 +61,11 @@ private:
 	void LookatMatrix(float fov, float nearPlane, float farPlane, Shader& shader, float deltaTime);
 	void FreeMatrix(float fov, float nearPlane, float farPlane, Shader& shader, float deltaTime);
 
-	void UpdateAngles(float deltaTime);
-	void UpdatePosition(float deltaTime);
+	// Free Camera Methods
+	glm::vec4 RotateView(float deltaTime); 
+	glm::vec4 ChangePosition(float deltaTime);
+
+	void CreateBezierCurve();
+	glm::vec4 MoveThroughBezier(float deltaTime);
 };
 #endif
