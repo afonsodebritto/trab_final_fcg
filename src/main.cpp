@@ -28,6 +28,7 @@
 #include "Obj.h"
 #include "VirtualScene.h"
 #include "Scenario.h"
+#include "textures.h"
 
 // Declaração de funções auxiliares para renderizar texto dentro da janela
 // OpenGL. Estas funções estão definidas no arquivo "textrendering.cpp".
@@ -109,6 +110,8 @@ int main()
     // Carregamos os shaders de vértices e de fragmentos que serão utilizados
     // para renderização. Veja slides 180-200 do documento Aula_03_Rendering_Pipeline_Grafico.pdf.
     //
+    LoadTextureImage("../../data/11665_Airplane_diff2.jpg");      // TextureImage0
+    LoadTextureImage("../../data/10445_Oak_Tree_v1_diffuse.jpg");
 
     // Inicializamos o código para renderização de texto.
 
@@ -149,7 +152,7 @@ int main()
     ObjModel treeModel("../../data/10445_Oak_Tree_v1_max2010_iteration-1.obj");
     VirtualScene.BuildTriangles(treeModel);
 
-    Scenario Scenario(1000.0f, 100, VirtualScene, GpuProgram);
+    Scenario Scenario(100.0f, 10, VirtualScene, GpuProgram);
 
 
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
