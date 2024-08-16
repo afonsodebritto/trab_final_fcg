@@ -185,3 +185,46 @@ void Airplane::UpdateAirDensity()
 
     air_density = rho;
 }
+
+void Airplane::Draw(VirtualScene &VirtualScene, Shader &GpuProgram)
+{
+    glm::mat4 Wheel;
+    // Desenhamos a fusilagem do avião
+    glm::mat4 fuselageMatrix = Matrix * Matrix_Translate(0.0f, -2.0f, 0.0f)
+                               * Matrix_Rotate_Y(-M_PI_2)
+                               * Matrix_Rotate_X(-M_PI_2)
+                               * Matrix_Scale(0.2f, 0.2f, 0.2f);
+    glUniformMatrix4fv(GpuProgram.model_uniform, 1, GL_FALSE, glm::value_ptr(fuselageMatrix));
+    glUniform1i(GpuProgram.object_id_uniform, FUSELAGE);
+    VirtualScene.DrawVirtualObject("fuselage", GpuProgram);
+
+    // Desenhamos a roda esquerda do avião
+    glm::mat4 leftWheelMatrix = Matrix * Matrix_Translate(0.0f, -2.0f, 0.0f)
+                                * Matrix_Rotate_Y(-M_PI_2)
+                                * Matrix_Rotate_X(-M_PI_2)
+                                * Matrix_Scale(0.2f, 0.2f, 0.2f);
+    glUniformMatrix4fv(GpuProgram.model_uniform, 1, GL_FALSE, glm::value_ptr(leftWheelMatrix));
+    glUniform1i(GpuProgram.object_id_uniform, WHEEL_LEFT);
+    VirtualScene.DrawVirtualObject("11665_Wheel_left", GpuProgram);
+
+    // Desenhamos a roda direita do avião
+    glm::mat4 rightWheelMatrix = Matrix * Matrix_Translate(0.0f, -2.0f, 0.0f)
+                                 * Matrix_Rotate_Y(-M_PI_2)
+                                 * Matrix_Rotate_X(-M_PI_2)
+                                 * Matrix_Scale(0.2f, 0.2f, 0.2f);
+    glUniformMatrix4fv(GpuProgram.model_uniform, 1, GL_FALSE, glm::value_ptr(rightWheelMatrix));
+    glUniform1i(GpuProgram.object_id_uniform, WHEEL_RIGHT);
+    VirtualScene.DrawVirtualObject("11665_Wheel_right", GpuProgram);
+
+    // Aplicar a rotação contínua
+    glm::vec3 rotorCenter = 0.5f * (VirtualScene.Objects["11665_Rotor"].bbox_min + VirtualScene.Objects["11665_Rotor"].bbox_max);
+    glm::mat4 rotorMatrix = Matrix * Matrix_Translate(-0.25f, -1.2f, 0.0f)
+                            * Matrix_Rotate_Y(-M_PI_2)
+                            * Matrix_Rotate_X(-M_PI_2)
+                            * Matrix_Scale(0.2f, 0.2f, 0.2f)
+                            * Matrix_Rotate_X((float)glfwGetTime() * 1.2f)
+                            * Matrix_Translate(-rotorCenter.x, -rotorCenter.y, -rotorCenter.z);
+    glUniformMatrix4fv(GpuProgram.model_uniform, 1, GL_FALSE, glm::value_ptr(rotorMatrix));
+    glUniform1i(GpuProgram.object_id_uniform, ROTOR);
+    VirtualScene.DrawVirtualObject("11665_Rotor", GpuProgram);
+}

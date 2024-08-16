@@ -8,9 +8,22 @@
 #include<glm/gtc/type_ptr.hpp>
 #include<glm/gtx/rotate_vector.hpp>
 #include<glm/gtx/vector_angle.hpp>
+#include <map>
+
+// Headers da biblioteca GLM: criação de matrizes e vetores.
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include"Matrices.h"
 #include"Inputs.h"
+#include"Obj.h"
+#include"VirtualScene.h"
+
+#define FUSELAGE 0
+#define WHEEL_LEFT  1
+#define WHEEL_RIGHT  2
+#define ROTOR 3
+#define TREE 4
 
 class Airplane
 {
@@ -47,6 +60,6 @@ public:
     
 
     void Movimentation(Inputs inputs, float delta_time);
-
+    void Draw(VirtualScene &VirtuaScene, Shader &GpuProgram);
 };
 #endif
