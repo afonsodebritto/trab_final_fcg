@@ -27,6 +27,7 @@
 #include "Inputs.h"
 #include "Obj.h"
 #include "VirtualScene.h"
+#include "textures.h"
 
 // Declaração de funções auxiliares para renderizar texto dentro da janela
 // OpenGL. Estas funções estão definidas no arquivo "textrendering.cpp".
@@ -121,6 +122,10 @@ int main()
 
     // Inicializamos o código para renderização de texto.
 
+    // Carregamos duas imagens para serem utilizadas como textura
+    LoadTextureImage("../../data/11665_Airplane_diff2.jpg");      // TextureImage0
+    //LoadTextureImage("../../data/10445_Oak_Tree_v1_diffuse.jpg");      // TextureImage1
+
     Shader GpuProgram("../../src/shaders/shader_vertex.glsl", "../../src/shaders/shader_fragment.glsl");
 
     TextRendering_Init();
@@ -134,10 +139,10 @@ int main()
 
     // Variáveis auxiliares utilizadas para chamada à função
     // TextRendering_ShowModelViewProjection(), armazenando matrizes 4x4.
-    glm::mat4 the_projection;
-    glm::mat4 the_model;
-    glm::mat4 the_view;
-    glm::mat4 model;
+    //glm::mat4 the_projection;
+    //glm::mat4 the_model;
+    //glm::mat4 the_view;
+    //glm::mat4 model;
 
     Airplane Airplane(glm::vec4(0.0f,0.0f,0.0f,1.0f), 10.0f, 50.0f);
 

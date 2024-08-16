@@ -39,6 +39,12 @@ Shader::Shader(const char* vertexFile, const char* fragmentFile)
     object_id_uniform  = glGetUniformLocation(ID, "object_id"); // Variável "object_id" em shader_fragment.glsl
     bbox_min_uniform   = glGetUniformLocation(ID, "bbox_min");
     bbox_max_uniform   = glGetUniformLocation(ID, "bbox_max");
+
+    // Variáveis em "shader_fragment.glsl" para acesso das imagens de textura
+    glUseProgram(ID);
+    glUniform1i(glGetUniformLocation(ID, "TextureImage0"), 0);
+    glUniform1i(glGetUniformLocation(ID, "TextureImage1"), 1);
+    glUseProgram(0);
 }
 
 // Função auxilar, utilizada pelas duas funções acima. Carrega código de GPU de
