@@ -27,6 +27,7 @@
 #include "Inputs.h"
 #include "Obj.h"
 #include "VirtualScene.h"
+#include "Scenario.h"
 
 // Declaração de funções auxiliares para renderizar texto dentro da janela
 // OpenGL. Estas funções estão definidas no arquivo "textrendering.cpp".
@@ -37,7 +38,6 @@ void TextRendering_PrintString(GLFWwindow* window, const std::string &str, float
 
 // Funções abaixo renderizam como texto na janela OpenGL algumas matrizes e
 // outras informações do programa. Definidas após main().
-void TextRendering_ShowEulerAngles(GLFWwindow* window, float yaw, float pitch);
 void TextRendering_ShowFramesPerSecond(GLFWwindow* window);
 void TextRendering_ShowAirplaneData(GLFWwindow* window, Airplane& airplane);
 
@@ -48,16 +48,7 @@ void ErrorCallback(int error, const char* description);
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 
-// Definimos uma estrutura que armazenará dados necessários para renderizar
-// cada objeto da cena virtual.
-// A cena virtual é uma lista de objetos nomeados, guardados em um dicionário
-// (map).  Veja dentro da função BuildTriangles() como que são incluídos
-// objetos dentro da variável g_VirtualScene, e veja na função main() como
-// estes são acessados.
-
 float g_ScreenRatio = 1.0f;
-
-// Variáveis para controlar se uma tecla está pressionada
 
 Inputs g_Inputs;
 
@@ -158,6 +149,8 @@ int main()
     ObjModel treeModel("../../data/10445_Oak_Tree_v1_max2010_iteration-1.obj");
     VirtualScene.BuildTriangles(treeModel);
 
+    Scenario Scenario(1000.0f, 100, VirtualScene, GpuProgram);
+
 
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
@@ -186,8 +179,9 @@ int main()
 
         Airplane.Draw(VirtualScene, GpuProgram);
 
-        TextRendering_ShowFramesPerSecond(window);
+        Scenario.DrawAllTrees(VirtualScene, GpuProgram);
 
+        TextRendering_ShowFramesPerSecond(window);
         TextRendering_ShowAirplaneData(window, Airplane);
 
         glfwSwapBuffers(window);
@@ -271,21 +265,6 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
 void ErrorCallback(int error, const char* description)
 {
     fprintf(stderr, "ERROR: GLFW: %s\n", description);
-}
-
-// Escrevemos na tela os ângulos de Euler definidos nas variáveis globais
-// g_freeCameraPitch, g_freeCameraYaw, e g_CameraDistance.
-void TextRendering_ShowEulerAngles(GLFWwindow* window, float yaw, float pitch)
-{
-    if ( !g_ShowInfoText )
-        return;
-
-    float pad = TextRendering_LineHeight(window);
-
-    char buffer[80];
-    snprintf(buffer, 80, "Euler Angles rotation matrix = Z(%.2f)*Y(%.2f)*X(%.2f)\n", yaw, 0.0, pitch);
-
-    TextRendering_PrintString(window, buffer, -1.0f+pad/10, -1.0f+2*pad/10, 1.0f);
 }
 
 // Escrevemos na tela o número de quadros renderizados por segundo (frames per
