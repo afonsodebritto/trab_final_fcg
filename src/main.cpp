@@ -246,7 +246,7 @@ int main(int argc, char* argv[])
     LoadShadersFromFiles();
 
     // Carregamos duas imagens para serem utilizadas como textura
-    LoadTextureImage("../../data/11665_Airplane_diff.jpg");      // TextureImage0
+    LoadTextureImage("../../data/11665_Airplane_diff2.jpg");      // TextureImage0
     LoadTextureImage("../../data/10445_Oak_Tree_v1_diffuse.jpg");      // TextureImage1
     
     ObjModel airplanemodel("../../data/11665_Airplane_v1_l3.obj");
@@ -396,21 +396,21 @@ int main(int argc, char* argv[])
         PopMatrix(model);
 
 
-        rotor_angle = rotor_angle + 0.01;
-        if (rotor_angle > 2 * M_PI) rotor_angle -= 2 * M_PI;
-
         model = Matrix_Identity();
         // Aplicar a rotação contínua
         // Ajuda
-
-        model *= Matrix_Rotate_X(rotor_angle);
+        glm::vec3 centro_rotor = 0.5f * (g_VirtualScene["11665_Rotor"].bbox_min + g_VirtualScene["11665_Rotor"].bbox_max);
+    
         PushMatrix(model);
-            model *= Matrix_Translate(0.0f, -2.0f, 0.0f);
+            model *= Matrix_Translate(-0.25f, -1.2f, 0.0f);
             PushMatrix(model);
                 // Aplicar a rotação fixa de -90 graus
                 model *= Matrix_Rotate_X(-3.14f / 2.0f);
                 PushMatrix(model);
                     model *= Matrix_Scale(0.2f, 0.2f, 0.2f);
+                    model *=  Matrix_Rotate_X((float)glfwGetTime() * 1.2f);
+
+                    model *= Matrix_Translate(-centro_rotor.x, -centro_rotor.y, -centro_rotor.z);
                     glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
                     glUniform1i(g_object_id_uniform, ROTOR);
                     DrawVirtualObject("11665_Rotor");

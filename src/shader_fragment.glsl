@@ -60,7 +60,7 @@ void main()
     vec4 n = normalize(normal);
 
     // Vetor que define o sentido da fonte de luz em relação ao ponto atual.
-    vec4 l = normalize(vec4(1.0,1.0,0.0,0.0));
+    vec4 l = normalize(vec4(1.0,1.0,0.0,0.0) - p);
 
     // Vetor que define o sentido da câmera em relação ao ponto atual.
     vec4 v = normalize(camera_position - p);
@@ -68,6 +68,12 @@ void main()
     // Coordenadas de textura U e V
     float U = 0.0;
     float V = 0.0;
+
+    // Espectro da fonte de iluminação
+    vec3 I = vec3(1.0, 1.0, 1.0);
+
+    // Espectro da luz ambiente
+    vec3 Ia = vec3(0.2, 0.2, 0.2);
 
     // Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
     vec3 Kd0;
@@ -84,12 +90,29 @@ void main()
         Kd0 = texture(TextureImage1, vec2(U,V)).rgb;
     }
     
-    // Equação de Iluminação
-    float lambert = max(0,dot(n,l));
-
-    color.rgb = Kd0 * (lambert + 0.01);
+    // Equação de Iluminação de lambert
+    vec3 termo_difuso_lambert = max(0,dot(n,l)) * I * Kd0;
 
     color.a = 1;
+
+    // O avião possui iluminação difusa (de lambert)
+    if(object_id == FUSELAGE || object_id == WHEEL_LEFT || object_id == WHEEL_RIGHT || object_id == ROTOR)
+    {
+        color.rgb = termo_difuso_lambert;
+    }
+    
+    // A árvore possui iluminção blinn-phong
+    if(object_id == TREE)
+    {
+        float q_linha = 80.0; 
+
+        vec4 h = normalize(v + l);
+
+        vec3 termo_ambiente = Kd0 * Ia;
+        vec3 termo_especular_blinn_phong = dot(n,h) * I * Kd0;
+
+        color.rgb = termo_difuso_lambert + termo_ambiente + termo_especular_blinn_phong;
+    }
 
     // Cor final com correção gamma, considerando monitor sRGB.
     // Veja https://en.wikipedia.org/w/index.php?title=Gamma_correction&oldid=751281772#Windows.2C_Mac.2C_sRGB_and_TV.2Fvideo_standard_gammas
