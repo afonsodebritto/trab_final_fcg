@@ -74,7 +74,7 @@ void Camera::LookatMatrix(float fov, float nearPlane, float farPlane, Shader& sh
 
 glm::vec4 Camera::MoveThroughBezier(float deltaTime)
 {
-	bezierTime += deltaTime;
+	bezierTime += deltaTime/bezierDistance*20;
 
     if (bezierTime > 1.0f)
     {
@@ -112,8 +112,8 @@ void Camera::CreateBezierCurve()
 	glm::vec4 bezierDirection = bezierFinal - bezierInicial;
 	bezierDistance = fabs(norm(bezierDirection));
 
-	bezierP1 = bezierInicial + bezierDirection / 3.0f + v1 * bezierDistance;
-	bezierP2 = bezierInicial + 2.0f * bezierDirection / 3.0f + v2 * bezierDistance / 2.0f;
+	bezierP1 = bezierInicial + bezierDirection / 3.0f + v1 * bezierDistance * 2.0f;
+	bezierP2 = bezierInicial + 2.0f * bezierDirection / 3.0f + v2 * bezierDistance;
 
 	if(bezierP1.y < 0)
 		bezierP1.y = 0.0f;
