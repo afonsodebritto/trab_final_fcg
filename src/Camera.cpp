@@ -28,7 +28,7 @@ void Camera::FreeUpdate(float screenRatio, Inputs inputs)
 	{
 		float r = norm(View);
 		Camera::pitch = acos(-View.y/r) - M_PI/2;
-		Camera::yaw = -atan2(-View.z, View.x) - M_PI/2;
+		Camera::yaw = -atan2(View.z, View.x) + M_PI/2;
 		Camera::roll = airplane->roll;
 		Camera::lastCursorXPos = inputs.cursorXPos;
 		Camera::lastCursorYPos = inputs.cursorYPos;
@@ -74,7 +74,7 @@ void Camera::LookatMatrix(float fov, float nearPlane, float farPlane, Shader& sh
 
 glm::vec4 Camera::MoveThroughBezier(float deltaTime)
 {
-    bezierTime += deltaTime;
+	bezierTime += deltaTime;
 
     if (bezierTime > 1.0f)
     {
