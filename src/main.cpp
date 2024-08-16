@@ -359,64 +359,44 @@ int main(int argc, char* argv[])
         // Desenhamos a roda esquerda do avião
         model = Matrix_Identity();
         model *= Matrix_Translate(0.0f, -2.0f, 0.0f);
-        PushMatrix(model);
-            model *= Matrix_Rotate_X(-3.14/2);
-            PushMatrix(model);
-            model *= Matrix_Scale(0.2f, 0.2f, 0.2f);
-                glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-                glUniform1i(g_object_id_uniform, FUSELAGE);
-                DrawVirtualObject("fuselage");
-            PopMatrix(model);
-        PopMatrix(model);
+        model *= Matrix_Rotate_X(-3.14/2);
+        model *= Matrix_Scale(0.2f, 0.2f, 0.2f);
+        glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, FUSELAGE);
+        DrawVirtualObject("fuselage");
 
         // Desenhamos a roda esquerda do avião
         model = Matrix_Identity();
         model *= Matrix_Translate(0.0f, -2.0f, 0.0f);
-        PushMatrix(model);
-            model *= Matrix_Rotate_X(-3.14/2);
-            PushMatrix(model);
-            model *= Matrix_Scale(0.2f, 0.2f, 0.2f);
-                glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-                glUniform1i(g_object_id_uniform, WHEEL_LEFT);
-                DrawVirtualObject("11665_Wheel_left");
-            PopMatrix(model);
-        PopMatrix(model);
+        model *= Matrix_Rotate_X(-3.14/2);
+        model *= Matrix_Scale(0.2f, 0.2f, 0.2f);
+        glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, WHEEL_LEFT);
+        DrawVirtualObject("11665_Wheel_left");
 
         // Desenhamos a roda direita do avião
         model = Matrix_Identity();
         model *= Matrix_Translate(0.0f, -2.0f, 0.0f);
-        PushMatrix(model);
-            model *= Matrix_Rotate_X(-3.14/2);
-            PushMatrix(model);
-            model *= Matrix_Scale(0.2f, 0.2f, 0.2f);
-                glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-                glUniform1i(g_object_id_uniform, WHEEL_RIGHT);
-                DrawVirtualObject("11665_Wheel_right");
-            PopMatrix(model);
-        PopMatrix(model);
+        model *= Matrix_Rotate_X(-3.14/2);
+        model *= Matrix_Scale(0.2f, 0.2f, 0.2f);
+        glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, WHEEL_RIGHT);
+        DrawVirtualObject("11665_Wheel_right");
 
 
         model = Matrix_Identity();
         // Aplicar a rotação contínua
         // Ajuda
         glm::vec3 centro_rotor = 0.5f * (g_VirtualScene["11665_Rotor"].bbox_min + g_VirtualScene["11665_Rotor"].bbox_max);
-    
-        PushMatrix(model);
-            model *= Matrix_Translate(-0.25f, -1.2f, 0.0f);
-            PushMatrix(model);
-                // Aplicar a rotação fixa de -90 graus
-                model *= Matrix_Rotate_X(-3.14f / 2.0f);
-                PushMatrix(model);
-                    model *= Matrix_Scale(0.2f, 0.2f, 0.2f);
-                    model *=  Matrix_Rotate_X((float)glfwGetTime() * 1.2f);
-
-                    model *= Matrix_Translate(-centro_rotor.x, -centro_rotor.y, -centro_rotor.z);
-                    glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-                    glUniform1i(g_object_id_uniform, ROTOR);
-                    DrawVirtualObject("11665_Rotor");
-                PopMatrix(model);
-            PopMatrix(model);
-        PopMatrix(model);
+        model *= Matrix_Translate(-0.25f, -1.2f, 0.0f);
+        // Aplicar a rotação fixa de -90 graus
+        model *= Matrix_Rotate_X(-3.14f / 2.0f);
+        model *= Matrix_Scale(0.2f, 0.2f, 0.2f);
+        model *=  Matrix_Rotate_X((float)glfwGetTime() * 1.2f);
+        model *= Matrix_Translate(-centro_rotor.x, -centro_rotor.y, -centro_rotor.z);
+        glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, ROTOR);
+        DrawVirtualObject("11665_Rotor");
 
 
         // Desenhamos a árvore
