@@ -19,7 +19,7 @@ out vec4 position_world;
 out vec4 position_model;
 out vec4 normal;
 out vec2 texcoords;
-out vec4 cor_v;
+out float lambert_gouraud;
 
 void main()
 {
@@ -37,7 +37,9 @@ void main()
     normal = inverse(transpose(model)) * normal_coefficients;
     normal.w = 0.0;
 
-    
+    vec4 l = normalize(vec4(1.0,1.0,0.0,0.0) - position_world);
+    vec4 n = normalize(normal);
+    lambert_gouraud = max(0, dot(n,l));
 
     // Coordenadas de textura obtidas do arquivo OBJ (se existirem!)
     texcoords = texture_coefficients;

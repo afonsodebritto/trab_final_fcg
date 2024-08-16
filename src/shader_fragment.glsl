@@ -13,6 +13,9 @@ in vec4 position_model;
 // Coordenadas de textura obtidas do arquivo OBJ (se existirem!)
 in vec2 texcoords;
 
+// Termo de lambert calculado pro gouraud
+in float lambert_gouraud;
+
 // Matrizes computadas no código C++ e enviadas para a GPU
 uniform mat4 model;
 uniform mat4 view;
@@ -98,7 +101,7 @@ void main()
     // O avião possui iluminação difusa (de lambert)
     if(object_id == FUSELAGE || object_id == WHEEL_LEFT || object_id == WHEEL_RIGHT || object_id == ROTOR)
     {
-        color.rgb = termo_difuso_lambert;
+        color.rgb = lambert_gouraud * I * Kd0;
     }
     
     // A árvore possui iluminção blinn-phong
