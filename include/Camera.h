@@ -53,6 +53,7 @@ public:
 
 	void Update(float screenRatio, Airplane& airplane, Inputs inputs, bool cameraType);
 	void Matrix(float fov, float nearPlane, float farPlane, Shader& shader, float deltaTime);
+	void Draw();
 	
 private:
 	void LookatUpdate(float screenRatio, Airplane& airplane);

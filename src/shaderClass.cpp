@@ -30,8 +30,15 @@ Shader::Shader(const char* vertexFile, const char* fragmentFile)
     if ( ID != 0 )
         glDeleteProgram(ID);
 
+
     // Criamos um programa de GPU utilizando os shaders carregados acima.
-    CreateGpuProgram(vertex_shader_id, fragment_shader_id);
+    ID = CreateGpuProgram(vertex_shader_id, fragment_shader_id);
+    model_uniform      = glGetUniformLocation(ID, "model"); // Variável da matriz "model"
+    view_uniform       = glGetUniformLocation(ID, "view"); // Variável da matriz "view" em shader_vertex.glsl
+    projection_uniform = glGetUniformLocation(ID, "projection"); // Variável da matriz "projection" em shader_vertex.glsl
+    object_id_uniform  = glGetUniformLocation(ID, "object_id"); // Variável "object_id" em shader_fragment.glsl
+    bbox_min_uniform   = glGetUniformLocation(ID, "bbox_min");
+    bbox_max_uniform   = glGetUniformLocation(ID, "bbox_max");
 }
 
 // Função auxilar, utilizada pelas duas funções acima. Carrega código de GPU de
@@ -104,33 +111,33 @@ void Shader::Load(const char* filename, GLuint shader_id)
     delete [] log;
 }
 
-void Shader::CreateGpuProgram(GLuint vertex_shader_id, GLuint fragment_shader_id)
+GLuint Shader::CreateGpuProgram(GLuint vertex_shader_id, GLuint fragment_shader_id)
 {
     // Criamos um identificador (ID) para este programa de GPU
-    ID = glCreateProgram();
+    GLuint program_id = glCreateProgram();
 
     // Definição dos dois shaders GLSL que devem ser executados pelo programa
-    glAttachShader(ID, vertex_shader_id);
-    glAttachShader(ID, fragment_shader_id);
+    glAttachShader(program_id, vertex_shader_id);
+    glAttachShader(program_id, fragment_shader_id);
 
     // Linkagem dos shaders acima ao programa
-    glLinkProgram(ID);
+    glLinkProgram(program_id);
 
     // Verificamos se ocorreu algum erro durante a linkagem
     GLint linked_ok = GL_FALSE;
-    glGetProgramiv(ID, GL_LINK_STATUS, &linked_ok);
+    glGetProgramiv(program_id, GL_LINK_STATUS, &linked_ok);
 
     // Imprime no terminal qualquer erro de linkagem
     if ( linked_ok == GL_FALSE )
     {
         GLint log_length = 0;
-        glGetProgramiv(ID, GL_INFO_LOG_LENGTH, &log_length);
+        glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &log_length);
 
         // Alocamos memória para guardar o log de compilação.
         // A chamada "new" em C++ é equivalente ao "malloc()" do C.
         GLchar* log = new GLchar[log_length];
 
-        glGetProgramInfoLog(ID, log_length, &log_length, log);
+        glGetProgramInfoLog(program_id, log_length, &log_length, log);
 
         std::string output;
 
@@ -144,6 +151,13 @@ void Shader::CreateGpuProgram(GLuint vertex_shader_id, GLuint fragment_shader_id
 
         fprintf(stderr, "%s", output.c_str());
     }
+
+    // Os "Shader Objects" podem ser marcados para deleção após serem linkados 
+    glDeleteShader(vertex_shader_id);
+    glDeleteShader(fragment_shader_id);
+
+    // Retornamos o ID gerado acima
+    return program_id;
 }
 
 // Activates the Shader Program
