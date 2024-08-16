@@ -199,7 +199,7 @@ int main()
         Camera.Update(g_ScreenRatio, Airplane, g_Inputs, cameraType);
         Camera.Matrix(fov, nearPlane, farPlane, GpuProgram, deltaTime);
 
-        if(cameraType == LOOKAT_CAMERA)
+        if(cameraType == LOOKAT_CAMERA && Camera.movingThroughBezierCurve == false)
             Airplane.Movimentation(g_Inputs, deltaTime);
 
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(Airplane.Matrix));

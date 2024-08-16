@@ -35,13 +35,6 @@ void Airplane::Movimentation(Inputs inputs, float delta_time)
 
     Position += Velocity;
 
-    printf("gravity %f\n", gravity);
-    printf("gravity %f\n", gravity);
-    printf("lift_acceleration %f\n", lift_acceleration);
-    printf("accelerationn %f\n", accelerationZ);
-    printf("result: %f\n", accelerationZ);
-    printf("speed: %f\n", speed);
-
     if (Position.y < 0)
         Position.y = 0;
 
