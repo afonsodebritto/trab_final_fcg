@@ -39,8 +39,7 @@ void TextRendering_PrintString(GLFWwindow* window, const std::string &str, float
 
 // Funções abaixo renderizam como texto na janela OpenGL algumas matrizes e
 // outras informações do programa. Definidas após main().
-void TextRendering_ShowFramesPerSecond(GLFWwindow* window);
-void TextRendering_ShowAirplaneData(GLFWwindow* window, Airplane& airplane);
+void TextRendering(GLFWwindow* window, Airplane& airplane, Scenario &Scenario);
 
 // Funções callback para comunicação com o sistema operacional e interação do
 // usuário. Veja mais comentários nas definições das mesmas, abaixo.
@@ -152,7 +151,7 @@ int main()
     ObjModel treeModel("../../data/10445_Oak_Tree_v1_max2010_iteration-1.obj");
     VirtualScene.BuildTriangles(treeModel);
 
-    Scenario Scenario(100.0f, 10, VirtualScene, GpuProgram);
+    Scenario Scenario(200.0f, 0.01f, VirtualScene, GpuProgram);
 
 
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
@@ -184,8 +183,7 @@ int main()
 
         Scenario.DrawAllTrees(VirtualScene, GpuProgram);
 
-        TextRendering_ShowFramesPerSecond(window);
-        TextRendering_ShowAirplaneData(window, Airplane);
+        TextRendering(window, Airplane, Scenario);
 
         glfwSwapBuffers(window);
 
@@ -270,19 +268,29 @@ void ErrorCallback(int error, const char* description)
     fprintf(stderr, "ERROR: GLFW: %s\n", description);
 }
 
-// Escrevemos na tela o número de quadros renderizados por segundo (frames per
-// second).
-void TextRendering_ShowFramesPerSecond(GLFWwindow* window)
+void TextRendering(GLFWwindow* window, Airplane& airplane, Scenario &Scenario)
 {
     if ( !g_ShowInfoText )
         return;
 
     // Variáveis estáticas (static) mantém seus valores entre chamadas
     // subsequentes da função!
+    static char  bufferSpeed[20] = "0.00 km/h";
+    static int   numcharsSpeed = 17;
+
+    static char  bufferAltitude[20] = "0.00 m";
+    static int   numcharsAltitude = 17;
+
+    static char  bufferPitch[20] = "0.00 deg";
+    static int   numcharsPitch = 16;
+
     static float old_seconds = (float)glfwGetTime();
     static int   ellapsed_frames = 0;
-    static char  buffer[20] = "??? fps";
-    static int   numchars = 7;
+    static char  bufferFPS[20] = "??? fps";
+    static int   numcharsFPS = 7;
+
+    static char  bufferTrees[20] = "??? trees";
+    static int   numcharsTrees = 10;
 
     ellapsed_frames += 1;
 
@@ -294,31 +302,11 @@ void TextRendering_ShowFramesPerSecond(GLFWwindow* window)
 
     if ( ellapsed_seconds > 1.0f )
     {
-        numchars = snprintf(buffer, 20, "%.2f fps", ellapsed_frames / ellapsed_seconds);
+        numcharsFPS = snprintf(bufferFPS, 20, "%.2f fps", ellapsed_frames / ellapsed_seconds);
     
         old_seconds = seconds;
         ellapsed_frames = 0;
     }
-
-    float lineheight = TextRendering_LineHeight(window);
-    float charwidth = TextRendering_CharWidth(window);
-
-    TextRendering_PrintString(window, buffer, 1.0f-(numchars + 1)*charwidth, 1.0f-lineheight, 1.0f);
-}
-
-void TextRendering_ShowAirplaneData(GLFWwindow* window, Airplane& airplane)
-{
-    if ( !g_ShowInfoText )
-        return;
-
-    // Variáveis estáticas (static) mantém seus valores entre chamadas
-    // subsequentes da função!
-    static char  bufferSpeed[20] = "0.00 km/h";
-    static int   numcharsSpeed = 17;
-    static char  bufferAltitude[20] = "0.00 m";
-    static int   numcharsAltitude = 17;
-    static char  bufferPitch[20] = "0.00 deg";
-    static int   numcharsPitch = 16;
 
 
     numcharsSpeed = snprintf(bufferSpeed, 20, "%.2f km/h", fabs(airplane.speed)*3.6f);
@@ -326,6 +314,8 @@ void TextRendering_ShowAirplaneData(GLFWwindow* window, Airplane& airplane)
     numcharsAltitude = snprintf(bufferAltitude, 20, "%.2f m", airplane.Position.y);
     
     numcharsPitch = snprintf(bufferPitch, 20, "%.2f deg", airplane.pitch*180/M_PI);
+
+    numcharsTrees = snprintf(bufferTrees, 20, "%d trees", Scenario.numTrees);
 
     float lineheight = TextRendering_LineHeight(window);
     float charwidth = TextRendering_CharWidth(window);
@@ -335,6 +325,11 @@ void TextRendering_ShowAirplaneData(GLFWwindow* window, Airplane& airplane)
     TextRendering_PrintString(window, bufferSpeed, -1.0f+charwidth, 1.0f-lineheight, 1.0f);
 
     TextRendering_PrintString(window, bufferPitch, -1.0f+charwidth, 1.0f-3*lineheight, 1.0f);
+
+    TextRendering_PrintString(window, bufferFPS, 1.0f-(numcharsFPS + 1)*charwidth, 1.0f-lineheight, 1.0f);
+
+    TextRendering_PrintString(window, bufferTrees, 1.0f-(numcharsTrees + 1)*charwidth, 1.0f-2*lineheight, 1.0f);
+
 }
 
 

@@ -1,71 +1,87 @@
 #include"Scenario.h"
 
-Scenario::Scenario(float radius, int numTrees, VirtualScene &VirtualScene, Shader &GpuProgram)
-    : radius(radius), numTrees(numTrees), gridSizeX(radius), gridSizeY(radius)
+Scenario::Scenario(float radius, float probability, VirtualScene &VirtualScene, Shader &GpuProgram)
+    : radius(radius)
 {
-    // Inicializa a semente para geração de números aleatórios
-    std::srand(static_cast<unsigned int>(std::time(0)));
+    // Definir o tamanho da matriz de árvores com base no raio
+    int matrixSize = static_cast<int>(2 * radius / 4);
+    treeMatrix.resize(matrixSize, std::vector<Tree>(matrixSize));
 
-    // Redimensiona a matriz de chunks para o tamanho desejado
-    treeMatrix.resize(gridSizeX, std::vector<std::vector<Tree>>(gridSizeY));
+    // Inicializar o gerador de números aleatórios com Mersenne Twister
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> probDist(0.0, 1.0);
+    std::uniform_real_distribution<> scaleDist(1.0, 3.0);
 
-    for (int i = 0; i < numTrees; ++i)
+    // Calcular a probabilidade baseada no número de árvores desejado e o tamanho da matriz
+    if (probability > 1.0f) probability = 1.0f;
+
+    // Iterar sobre cada elemento da matriz e preencher com árvores com base na probabilidade
+    for (int i = 0; i < matrixSize; ++i)
     {
-        // Gera ângulo e raio aleatórios para a posição dentro do círculo
-        float angle = static_cast<float>(std::rand()) / RAND_MAX * 2 * M_PI; // Ângulo em radianos
-        float r = static_cast<float>(std::rand()) / RAND_MAX * radius; // Raio aleatório até o limite do círculo
-
-        // Converte para coordenadas x e y
-        float x = r * std::cos(angle);
-        float y = r * std::sin(angle);
-
-        // Definir z e w como 0 para simplificação, ou usar outro valor conforme necessidade
-        glm::vec4 position(x, y, 0.0f, 1.0f);
-
-        // Gera a escala aleatória, com x = z e y aleatório entre 1 e 3
-        float scaleXZ = 1.0f + static_cast<float>(std::rand()) / (RAND_MAX / 2.0f);
-        float scaleY = 1.0f + static_cast<float>(std::rand()) / (RAND_MAX / 2.0f);
-        glm::vec3 scale(scaleXZ, scaleY, scaleXZ);
-
-        // Calcula a posição do chunk (4x4)
-        int chunkX = static_cast<int>(x) / 4;
-        int chunkY = static_cast<int>(y) / 4;
-
-        // Verifica se a posição do chunk está dentro dos limites da matriz
-        if (chunkX >= 0 && chunkX < gridSizeX && chunkY >= 0 && chunkY < gridSizeY)
+        for (int j = 0; j < matrixSize; ++j)
         {
-            Tree tree = Tree{position, scale};
-            // Adiciona a árvore ao chunk correspondente
-            treeMatrix[chunkX][chunkY].push_back(tree);
+            // Calcular a posição do centro do chunk
+            float xPos = (i * 4.0f) + 2.0f - radius;
+            float zPos = (j * 4.0f) + 2.0f - radius;
 
-            treeVector.push_back(tree);
+            // Verificar se a posição do chunk está dentro do círculo de raio "radius"
+            float distanceFromCenter = std::sqrt(xPos * xPos + zPos * zPos);
+            if (distanceFromCenter <= radius)
+            {
+                // Gerar um número aleatório entre 0 e 1 para determinar se uma árvore será colocada
+                if (probDist(gen) < probability)
+                {
+                    Tree tree;
+
+                    // Definir a posição da árvore no centro do chunk
+                    tree.Position = glm::vec4(xPos, 0.0f, zPos, 1.0f);
+
+                    // Definir o fator de escala aleatório com as restrições x=z e entre 1.0f e 3.0f
+                    float scaleXZ = scaleDist(gen);
+                    tree.Scale = glm::vec3(scaleXZ, scaleDist(gen), scaleXZ);
+
+                    // Adicionar a árvore à matriz e ao vetor de árvores
+                    treeMatrix[i][j] = tree;
+                    treeVector.push_back(tree);
+                    numTrees++;
+                }
+            }
         }
     }
 }
+
+
+
 
 
 std::vector<Tree> Scenario::getAdjascentTrees(glm::vec4 Position)
 {
     std::vector<Tree> adjacentTrees;
 
-    // Calcula em qual chunk a posição atual se encontra
-    int chunkX = static_cast<int>(Position.x) / 4;
-    int chunkY = static_cast<int>(Position.y) / 4;
+    // Calcular o índice da posição na matriz
+    int matrixSize = static_cast<int>(2 * radius / 4);
+    int xIndex = static_cast<int>((Position.x + radius) / 4.0f);
+    int zIndex = static_cast<int>((Position.z + radius) / 4.0f);
 
-    // Percorre o chunk atual e os 8 chunks vizinhos
-    for (int dx = -1; dx <= 1; ++dx)
+    // Garantir que os índices estão dentro dos limites da matriz
+    xIndex = std::max(0, std::min(xIndex, matrixSize - 1));
+    zIndex = std::max(0, std::min(zIndex, matrixSize - 1));
+
+    // Iterar sobre os chunks da vizinhança 8, incluindo o chunk central
+    for (int i = -1; i <= 1; ++i)
     {
-        for (int dy = -1; dy <= 1; ++dy)
+        for (int j = -1; j <= 1; ++j)
         {
-            int neighborX = chunkX + dx;
-            int neighborY = chunkY + dy;
+            int neighborX = xIndex + i;
+            int neighborZ = zIndex + j;
 
-            // Verifica se o chunk vizinho está dentro dos limites da matriz
-            if (neighborX >= 0 && neighborX < gridSizeX && neighborY >= 0 && neighborY < gridSizeY)
+            // Verificar se os índices vizinhos estão dentro dos limites da matriz
+            if (neighborX >= 0 && neighborX < matrixSize && neighborZ >= 0 && neighborZ < matrixSize)
             {
-                // Adiciona todas as árvores do chunk vizinho ao vetor de árvores adjacentes
-                const std::vector<Tree>& treesInChunk = treeMatrix[neighborX][neighborY];
-                adjacentTrees.insert(adjacentTrees.end(), treesInChunk.begin(), treesInChunk.end());
+                // Adicionar a árvore do chunk vizinho, se existir
+                Tree &tree = treeMatrix[neighborX][neighborZ];
+                adjacentTrees.push_back(tree);
             }
         }
     }
@@ -73,12 +89,11 @@ std::vector<Tree> Scenario::getAdjascentTrees(glm::vec4 Position)
     return adjacentTrees;
 }
 
-
 void Scenario::DrawTree(Tree tree, VirtualScene &VirtualScene, Shader &GpuProgram)
 {
-    glm::mat4 treeModel = Matrix_Scale(0.003f*tree.Scale.x,0.003f*tree.Scale.y,0.003f*tree.Scale.z)
+    glm::mat4 treeModel = Matrix_Translate(tree.Position.x,tree.Position.y - 2.0f,tree.Position.z)
                           * Matrix_Rotate_X(-M_PI_2)
-                          * Matrix_Translate(tree.Position.x,tree.Position.y - 2.0f,tree.Position.z);
+                          * Matrix_Scale(0.003f*tree.Scale.x,0.003f*tree.Scale.y,0.003f*tree.Scale.z);
     glUniformMatrix4fv(GpuProgram.model_uniform, 1 , GL_FALSE , glm::value_ptr(treeModel));
     glUniform1i(GpuProgram.object_id_uniform, 4);
     VirtualScene.DrawVirtualObject("10445_Oak_tree_v1_SG", GpuProgram);

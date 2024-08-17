@@ -18,6 +18,7 @@
 #include <ctime>         // Para time()
 #include <functional>
 #include <utility>
+#include <random>
 
 // Headers da biblioteca GLM: criação de matrizes e vetores.
 #include <glm/glm.hpp>
@@ -37,14 +38,12 @@ struct Tree
 class Scenario
 {
 public:
-    int gridSizeX; // Tamanho da matriz em X (número de chunks)
-    int gridSizeY; // Tamanho da matriz em Y (número de chunks)
     float radius;
-    int numTrees;
-    std::vector<std::vector<std::vector<Tree>>> treeMatrix;
+    int numTrees = 0;
+    std::vector<std::vector<Tree>> treeMatrix;
     std::vector<Tree> treeVector;
 
-    Scenario(float radius, int numTrees, VirtualScene &VirtualScene, Shader &GpuProgram);
+    Scenario(float radius, float probability, VirtualScene &VirtualScene, Shader &GpuProgram);
     std::vector<Tree> getAdjascentTrees(glm::vec4 Position);
     void DrawTree(Tree tree, VirtualScene &VirtualScene, Shader &GpuProgram);
     void DrawAllTrees(VirtualScene &VirtualScene, Shader &GpuProgram);
