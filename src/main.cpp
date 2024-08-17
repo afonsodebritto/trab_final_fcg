@@ -247,12 +247,12 @@ int main(int argc, char* argv[])
 
     // Carregamos duas imagens para serem utilizadas como textura
     LoadTextureImage("../../data/11665_Airplane_diff2.jpg");      // TextureImage0
-    LoadTextureImage("../../data/10445_Oak_Tree_v1_diffuse.jpg");      // TextureImage1
+    LoadTextureImage("../../data/10459_White_Ash_Tree_v1_Diffuse.jpg");      // TextureImage1
     
     ObjModel airplanemodel("../../data/11665_Airplane_v1_l3.obj");
     BuildTrianglesAndAddToVirtualScene(&airplanemodel);
 
-    ObjModel treemodel("../../data/10445_Oak_Tree_v1_max2010_iteration-1.obj");
+    ObjModel treemodel("../../data/10459_White_Ash_Tree_v1_L3.obj");
     BuildTrianglesAndAddToVirtualScene(&treemodel);
 
     if ( argc > 1 )
@@ -398,7 +398,6 @@ int main(int argc, char* argv[])
         glUniform1i(g_object_id_uniform, ROTOR);
         DrawVirtualObject("11665_Rotor");
 
-
         // Desenhamos a árvore
         model = Matrix_Identity();
         model *= Matrix_Scale(0.003f,0.003f,0.003f);
@@ -406,7 +405,7 @@ int main(int argc, char* argv[])
         model *= Matrix_Translate(0.0f,-2.0f,0.0f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, TREE);
-        DrawVirtualObject("10445_Oak_tree_v1_SG");
+        DrawVirtualObject("10459_White_Ash_Tree_v1_SG");
 
         // Imprimimos na informação sobre a matriz de projeção sendo utilizada.
         TextRendering_ShowProjection(window);

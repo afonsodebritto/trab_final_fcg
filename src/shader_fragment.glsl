@@ -27,6 +27,9 @@ uniform mat4 projection;
 #define WHEEL_RIGHT  2
 #define ROTOR 3
 #define TREE 4
+#define TRUNKS 5
+#define LEAVES 6
+
 uniform int object_id;
 
 // Parâmetros da axis-aligned bounding box (AABB) do modelo
