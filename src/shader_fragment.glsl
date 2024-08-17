@@ -27,8 +27,7 @@ uniform mat4 projection;
 #define WHEEL_RIGHT  2
 #define ROTOR 3
 #define TREE 4
-#define TRUNKS 5
-#define LEAVES 6
+#define ISLAND 5
 
 uniform int object_id;
 
@@ -39,6 +38,7 @@ uniform vec4 bbox_max;
 // Variáveis para acesso das imagens de textura
 uniform sampler2D TextureImage0;
 uniform sampler2D TextureImage1;
+uniform sampler2D TextureImage2;
 
 // O valor de saída ("out") de um Fragment Shader é a cor final do fragmento.
 out vec4 color;
@@ -94,6 +94,23 @@ void main()
         float U = texcoords.x;
         float V = texcoords.y;
         Kd0 = texture(TextureImage1, vec2(U,V)).rgb;
+    }
+    else if(object_id == ISLAND)
+    {
+        vec4 bbox_center = (bbox_min + bbox_max) / 2.0;
+
+        // Calculando o vetor p
+        vec4 p = (position_model - bbox_center);
+
+        // Calculando os ângulos theta e phi
+        float theta = atan(p.z, p.x);
+        float phi = asin(p.y);
+
+        // Convertendo para coordenadas de textura U e V
+        U = (theta + M_PI) / (2.0 * M_PI);
+        V = (phi + M_PI / 2.0) / M_PI;
+
+        Kd0 = texture(TextureImage2, vec2(U,v)).rgb;
     }
     
     // Equação de Iluminação de lambert

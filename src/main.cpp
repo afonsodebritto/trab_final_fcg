@@ -248,12 +248,16 @@ int main(int argc, char* argv[])
     // Carregamos duas imagens para serem utilizadas como textura
     LoadTextureImage("../../data/11665_Airplane_diff2.jpg");      // TextureImage0
     LoadTextureImage("../../data/10459_White_Ash_Tree_v1_Diffuse.jpg");      // TextureImage1
+    LoadTextureImage("../../data/rocky_terrain_diff_1k.jpg");      // TextureImage2
     
     ObjModel airplanemodel("../../data/11665_Airplane_v1_l3.obj");
     BuildTrianglesAndAddToVirtualScene(&airplanemodel);
 
     ObjModel treemodel("../../data/10459_White_Ash_Tree_v1_L3.obj");
     BuildTrianglesAndAddToVirtualScene(&treemodel);
+
+    ObjModel islandmodel("../../data/Island.obj");
+    BuildTrianglesAndAddToVirtualScene(&islandmodel);
 
     if ( argc > 1 )
     {
@@ -355,6 +359,7 @@ int main(int argc, char* argv[])
         #define WHEEL_RIGHT  2
         #define ROTOR 3
         #define TREE 4
+        #define ISLAND 5
 
         // Desenhamos a roda esquerda do avião
         model = Matrix_Identity();
@@ -406,6 +411,14 @@ int main(int argc, char* argv[])
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, TREE);
         DrawVirtualObject("10459_White_Ash_Tree_v1_SG");
+
+        // Desenhamos a ilha
+        model = Matrix_Identity();
+        model *= Matrix_Scale(0.05f,0.05f,0.05f);
+        model *= Matrix_Translate(0.0f,-5.0f,0.0f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, ISLAND);
+        DrawVirtualObject("Island_Cone.001");
 
         // Imprimimos na informação sobre a matriz de projeção sendo utilizada.
         TextRendering_ShowProjection(window);
