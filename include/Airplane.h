@@ -41,6 +41,7 @@ public:
     float speedGravity = 0.0f;
     float acceleration;
     float max_speed;
+    float rotorSpeed = 0;
 
     // Variáveis do ambiente
     float air_density = 1.225f;       // Densidade do ar ao nível do mar (kg/m^3)
@@ -60,6 +61,6 @@ public:
     
 
     void Movimentation(Inputs inputs, float delta_time);
-    void Draw(VirtualScene &VirtuaScene, Shader &GpuProgram);
+    void Draw(VirtualScene &VirtualScene, Shader &GpuProgram, float delta_time);
 };
 #endif

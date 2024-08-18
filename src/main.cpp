@@ -109,8 +109,8 @@ int main()
     // Carregamos os shaders de vértices e de fragmentos que serão utilizados
     // para renderização. Veja slides 180-200 do documento Aula_03_Rendering_Pipeline_Grafico.pdf.
     //
-    LoadTextureImage("../../data/11665_Airplane_diff2.jpg");      // TextureImage0
-    LoadTextureImage("../../data/10445_Oak_Tree_v1_diffuse.jpg");
+    LoadTextureImage("../../data/11804_Airplane_diff.jpg");      // TextureImage0
+    LoadTextureImage("../../data/Palette_Gradient.png");
 
     // Inicializamos o código para renderização de texto.
 
@@ -145,13 +145,19 @@ int main()
 
     VirtualScene VirtualScene;
 
-    ObjModel airplaneModel("../../data/11665_Airplane_v1_l3.obj");
+    ObjModel airplaneModel("../../data/aviao.obj");
     VirtualScene.BuildTriangles(airplaneModel);
 
-    ObjModel treeModel("../../data/10445_Oak_Tree_v1_max2010_iteration-1.obj");
-    VirtualScene.BuildTriangles(treeModel);
+    ObjModel treeGreenModel("../../data/TreeGreen.obj");
+    VirtualScene.BuildTriangles(treeGreenModel);
+    
+    ObjModel treeRedModel("../../data/TreeRed.obj");
+    VirtualScene.BuildTriangles(treeRedModel);
+    
+    ObjModel treeBlueModel("../../data/TreeBlue.obj");
+    VirtualScene.BuildTriangles(treeBlueModel);
 
-    Scenario Scenario(200.0f, 0.01f, VirtualScene, GpuProgram);
+    Scenario Scenario(300.0f, 0.03f, VirtualScene, GpuProgram);
 
 
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
@@ -179,7 +185,7 @@ int main()
         if(cameraType == LOOKAT_CAMERA && Camera.movingThroughBezierCurve == false)
             Airplane.Movimentation(g_Inputs, deltaTime);
 
-        Airplane.Draw(VirtualScene, GpuProgram);
+        Airplane.Draw(VirtualScene, GpuProgram, deltaTime);
 
         Scenario.DrawAllTrees(VirtualScene, GpuProgram);
 

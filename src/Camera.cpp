@@ -62,7 +62,7 @@ void Camera::LookatMatrix(float fov, float nearPlane, float farPlane, Shader& sh
 		Position = Matrix_Rotate_Y(airplane->yaw)
 				   * Matrix_Rotate_X(airplane->pitch/1.8)
 				   * Matrix_Rotate_Z(airplane->roll/1.8)
-				   * glm::vec4(0.0f,1.0f,norm(airplane->Direction) * (airplane->speed/2 + 12) / 2,0.0f)
+				   * glm::vec4(0.0f,2.0f,norm(airplane->Direction) * (airplane->speed/2 + 12) / 2,0.0f)
 				   + airplane->Position;
 
 	View = airplane->Position - Position;
@@ -99,7 +99,7 @@ void Camera::CreateBezierCurve()
 	bezierFinal = Matrix_Rotate_Y(airplane->yaw)
 	              * Matrix_Rotate_X(airplane->pitch/1.8)
 				  * Matrix_Rotate_Z(airplane->roll/1.8)
-				  * glm::vec4(0.0f, 1.0f, norm(airplane->Direction) * (airplane->speed/2 + 12) / 2, 0.0f)
+				  * glm::vec4(0.0f, 2.0f, norm(airplane->Direction) * (airplane->speed/2 + 12) / 2, 0.0f)
 				  + airplane->Position;
 	bezierInicial = Position;
 

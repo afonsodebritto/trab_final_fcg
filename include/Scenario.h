@@ -45,7 +45,7 @@ public:
 
     Scenario(float radius, float probability, VirtualScene &VirtualScene, Shader &GpuProgram);
     std::vector<Tree> getAdjascentTrees(glm::vec4 Position);
-    void DrawTree(Tree tree, VirtualScene &VirtualScene, Shader &GpuProgram);
+    void DrawTree(Tree tree, VirtualScene &VirtualScene, Shader &GpuProgram, int color);
     void DrawAllTrees(VirtualScene &VirtualScene, Shader &GpuProgram);
 };
 

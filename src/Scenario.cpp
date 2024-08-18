@@ -11,7 +11,7 @@ Scenario::Scenario(float radius, float probability, VirtualScene &VirtualScene, 
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> probDist(0.0, 1.0);
-    std::uniform_real_distribution<> scaleDist(1.0, 3.0);
+    std::uniform_real_distribution<> scaleDist(1.0, 2.0);
 
     // Calcular a probabilidade baseada no número de árvores desejado e o tamanho da matriz
     if (probability > 1.0f) probability = 1.0f;
@@ -38,8 +38,8 @@ Scenario::Scenario(float radius, float probability, VirtualScene &VirtualScene, 
                     tree.Position = glm::vec4(xPos, 0.0f, zPos, 1.0f);
 
                     // Definir o fator de escala aleatório com as restrições x=z e entre 1.0f e 3.0f
-                    float scaleXZ = scaleDist(gen);
-                    tree.Scale = glm::vec3(scaleXZ, scaleDist(gen), scaleXZ);
+                    float scale = scaleDist(gen);
+                    tree.Scale = glm::vec3(scale, scale, scale);
 
                     // Adicionar a árvore à matriz e ao vetor de árvores
                     treeMatrix[i][j] = tree;
@@ -89,20 +89,24 @@ std::vector<Tree> Scenario::getAdjascentTrees(glm::vec4 Position)
     return adjacentTrees;
 }
 
-void Scenario::DrawTree(Tree tree, VirtualScene &VirtualScene, Shader &GpuProgram)
+void Scenario::DrawTree(Tree tree, VirtualScene &VirtualScene, Shader &GpuProgram, int color)
 {
-    glm::mat4 treeModel = Matrix_Translate(tree.Position.x,tree.Position.y - 2.0f,tree.Position.z)
-                          * Matrix_Rotate_X(-M_PI_2)
-                          * Matrix_Scale(0.003f*tree.Scale.x,0.003f*tree.Scale.y,0.003f*tree.Scale.z);
+    glm::mat4 treeModel = Matrix_Translate(tree.Position.x,tree.Position.y,tree.Position.z)
+                          * Matrix_Scale(tree.Scale.x,tree.Scale.y,tree.Scale.z);
     glUniformMatrix4fv(GpuProgram.model_uniform, 1 , GL_FALSE , glm::value_ptr(treeModel));
     glUniform1i(GpuProgram.object_id_uniform, 4);
-    VirtualScene.DrawVirtualObject("10445_Oak_tree_v1_SG", GpuProgram);
+    if(color == 0)
+        VirtualScene.DrawVirtualObject("Tree_01_summer_red", GpuProgram);
+    else if(color == 1)
+        VirtualScene.DrawVirtualObject("Tree_01_summer_blue", GpuProgram);
+    else
+        VirtualScene.DrawVirtualObject("Tree_01_summer", GpuProgram);
 }
 
 void Scenario::DrawAllTrees(VirtualScene &VirtualScene, Shader &GpuProgram)
-{
+{   
     for (int i = 0; i < numTrees; ++i)
     {
-        DrawTree(treeVector[i], VirtualScene, GpuProgram);
+        DrawTree(treeVector[i], VirtualScene, GpuProgram, i % 3);
     }
 }
