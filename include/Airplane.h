@@ -28,7 +28,6 @@
 class Airplane
 {
 public:
-	// Stores the main vectors of the camera
 	glm::vec4 Position;
     glm::vec4 Direction = glm::vec4(0.0f,0.0f,-1.0f,0.0f);
     glm::mat4 Matrix;

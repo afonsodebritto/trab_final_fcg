@@ -3,15 +3,13 @@
 void Airplane::Movimentation(Inputs inputs, float delta_time)
 {
     if(speed<0) speed = 0;
-    // pitts special s2
-    // 10m = 1m = 1.0f -> valores adaptados para essa restrição
+
     // Atualiza a direção do avião considerando as rotações atuais
     Direction = Matrix_Rotate_Y(yaw) * Matrix_Rotate_X(pitch) * Matrix_Rotate_Z(roll) * glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
     Direction = Direction / norm(Direction);
     const bool FLYING = Position.y > 0;
 
     // Sustentação (lift) que contrabalança a gravidade, mantendo o avião em voo
-
     UpdateRotation(inputs.keyPressedD, inputs.keyPressedA, inputs.keyPressedS, inputs.keyPressedW, delta_time);
     UpdateSpeed(inputs.keyPressedLeftShift, inputs.keyPressedLeftControl, delta_time);
     UpdateAirDensity();
@@ -78,12 +76,10 @@ void Airplane::UpdateRotation(bool rotateRight, bool rotateLeft, bool rotateUp, 
     float delta_rotate_roll = acceleration_rotate * (fabs(roll) + 1) / 50;
     float delta_rotate_yaw = acceleration_rotate * (fabs(roll) + 1) / 50;
 
-    // Aceleração e desaceleração
     const bool FLYING = Position.y > 0;
     const float MAX_ROLL = M_PI/3;
     const float MAX_PITCH = M_PI/3;
 
-    // Controle de rotação: rolagem e arfagem
     if (rotateLeft)
     {
         if(roll > 0)
@@ -193,6 +189,11 @@ void Airplane::Draw(VirtualScene &VirtualScene, Shader &GpuProgram, float delta_
     glUniformMatrix4fv(GpuProgram.model_uniform, 1, GL_FALSE, glm::value_ptr(bodyMatrix));
     glUniform1i(GpuProgram.object_id_uniform, FUSELAGE);
     VirtualScene.DrawVirtualObject("body", GpuProgram);
+
+    glm::mat4 wingsMatrix = Matrix;
+    glUniformMatrix4fv(GpuProgram.model_uniform, 1, GL_FALSE, glm::value_ptr(wingsMatrix));
+    glUniform1i(GpuProgram.object_id_uniform, FUSELAGE);
+    VirtualScene.DrawVirtualObject("wings", GpuProgram);
 
     rotorSpeed += delta_time*speed;
 

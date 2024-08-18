@@ -47,6 +47,7 @@ public:
     std::vector<Tree> getAdjascentTrees(glm::vec4 Position);
     void DrawTree(Tree tree, VirtualScene &VirtualScene, Shader &GpuProgram, int color);
     void DrawAllTrees(VirtualScene &VirtualScene, Shader &GpuProgram);
+    void DrawFloor(VirtualScene &VirtualScene, Shader &GpuProgram);
 };
 
 #endif
