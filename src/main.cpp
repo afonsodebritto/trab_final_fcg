@@ -51,6 +51,7 @@
 #include "textures.h"
 #include "load_shaders.h"
 #include "callbacks.h"
+#include "colisions.h"
 
 // Estrutura que representa um modelo geométrico carregado a partir de um
 // arquivo ".obj". Veja https://en.wikipedia.org/wiki/Wavefront_.obj_file .
@@ -369,6 +370,7 @@ int main(int argc, char* argv[])
         glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, FUSELAGE);
         DrawVirtualObject("fuselage");
+        std::pair<glm::vec3, glm::vec3> bbox_fuselage_model = transformAABB(g_VirtualScene["fuselage"].bbox_min, g_VirtualScene["fuselage"].bbox_max, model);
 
         // Desenhamos a roda esquerda do avião
         model = Matrix_Identity();
@@ -378,6 +380,7 @@ int main(int argc, char* argv[])
         glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, WHEEL_LEFT);
         DrawVirtualObject("11665_Wheel_left");
+        std::pair<glm::vec3, glm::vec3> bbox_wheel_left_model = transformAABB(g_VirtualScene["11665_Wheel_Left"].bbox_min, g_VirtualScene["11665_Wheel_Left"].bbox_max, model);
 
         // Desenhamos a roda direita do avião
         model = Matrix_Identity();
@@ -387,7 +390,7 @@ int main(int argc, char* argv[])
         glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, WHEEL_RIGHT);
         DrawVirtualObject("11665_Wheel_right");
-
+        std::pair<glm::vec3, glm::vec3> bbox_wheel_right_model = transformAABB(g_VirtualScene["11665_Wheel_Right"].bbox_min, g_VirtualScene["11665_Wheel_Right"].bbox_max, model);
 
         model = Matrix_Identity();
         // Aplicar a rotação contínua
@@ -402,15 +405,25 @@ int main(int argc, char* argv[])
         glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, ROTOR);
         DrawVirtualObject("11665_Rotor");
+        std::pair<glm::vec3, glm::vec3> bbox_rotor_model = transformAABB(g_VirtualScene["11665_Rotor"].bbox_min, g_VirtualScene["11665_Rotor"].bbox_max, model);
 
         // Desenhamos a árvore
         model = Matrix_Identity();
         model *= Matrix_Scale(0.003f,0.003f,0.003f);
         model *= Matrix_Rotate_X(-3.14/2);
-        model *= Matrix_Translate(0.0f,-2.0f,0.0f);
+        model *= Matrix_Translate(0.0f,2.0f,0.0f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, TREE);
         DrawVirtualObject("10459_White_Ash_Tree_v1_SG");
+        std::pair<glm::vec3, glm::vec3> bbox_tree_model = transformAABB(g_VirtualScene["10459_White_Ash_Tree_v1_SG"].bbox_min, g_VirtualScene["10459_White_Ash_Tree_v1_SG"].bbox_max, model);
+        // std::cout << "Min.x: " << bbox_tree_model.first.x << std::endl;
+        // std::cout << "Min.y: " << bbox_tree_model.first.y << std::endl;
+        // std::cout << "Min.z: " << bbox_tree_model.first.z << std::endl;
+
+        // // Acessando o valor máximo transformado
+        // std::cout << "Max.x: " << bbox_tree_model.second.x << std::endl;
+        // std::cout << "Max.y: " << bbox_tree_model.second.y << std::endl;
+        // std::cout << "Max.z: " << bbox_tree_model.second.z << std::endl;
 
         // Desenhamos a ilha
         model = Matrix_Identity();
@@ -418,7 +431,11 @@ int main(int argc, char* argv[])
         model *= Matrix_Translate(0.0f,-5.0f,0.0f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, ISLAND);
-        DrawVirtualObject("Island_Cone.001");
+        DrawVirtualObject("Island_Cone.001");        
+        std::pair<glm::vec3, glm::vec3> bbox_island_model = transformAABB(g_VirtualScene["Island_Cone.001"].bbox_min, g_VirtualScene["Island_Cone.001"].bbox_max, model);
+        
+
+        std::cout << cubo_cubo_intersc(bbox_tree_model.first, bbox_tree_model.second, bbox_island_model.first, bbox_island_model.second) << std::endl;
 
         // Imprimimos na informação sobre a matriz de projeção sendo utilizada.
         TextRendering_ShowProjection(window);
