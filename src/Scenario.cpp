@@ -81,7 +81,8 @@ std::vector<Tree> Scenario::getAdjascentTrees(glm::vec4 Position)
             {
                 // Adicionar a árvore do chunk vizinho, se existir
                 Tree &tree = treeMatrix[neighborX][neighborZ];
-                adjacentTrees.push_back(tree);
+                if(tree.Position != glm::vec4(0.0f, 0.0f, 0.0f, 0.0f))
+                    adjacentTrees.push_back(tree);
             }
         }
     }

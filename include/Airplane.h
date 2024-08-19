@@ -18,6 +18,8 @@
 #include"Inputs.h"
 #include"Obj.h"
 #include"VirtualScene.h"
+#include"Scenario.h"
+#include"collisions.h"
 
 #define FUSELAGE 0
 #define WHEEL_LEFT  1
@@ -51,6 +53,7 @@ public:
     const float lift_coefficient = 1.2f;    // Coeficiente de sustentação básico
     const float reference_area = 16.2f;     // Área frontal de referência do avião (m^2)
     const float mass = 743.0f;               // Massa do avião (kg)
+    bool flying = false;
 
 
 	Airplane(glm::vec4 position, float acceleration, float max_speed);
@@ -58,8 +61,8 @@ public:
     void UpdateSpeed(bool accelerate, bool brake, float delta_time);
     void UpdateAirDensity();
     
-
-    void Movimentation(Inputs inputs, float delta_time);
+    void Collisions(float delta_time, VirtualScene &VirtualScene, Scenario &Scenario);
+    void Movimentation(Inputs inputs, float delta_time, VirtualScene &VirtualScene, Scenario &Scenario);
     void Draw(VirtualScene &VirtualScene, Shader &GpuProgram, float delta_time);
 };
 #endif

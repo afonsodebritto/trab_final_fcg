@@ -161,7 +161,7 @@ int main()
     ObjModel chaoModel("../../data/chao.obj");
     VirtualScene.BuildTriangles(chaoModel);
 
-    Scenario Scenario(300.0f, 0.02f, VirtualScene, GpuProgram);
+    Scenario Scenario(200.0f, 0.03f, VirtualScene, GpuProgram);
 
 
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
@@ -187,7 +187,7 @@ int main()
         Camera.Matrix(fov, nearPlane, farPlane, GpuProgram, deltaTime);
 
         if(cameraType == LOOKAT_CAMERA && Camera.movingThroughBezierCurve == false)
-            Airplane.Movimentation(g_Inputs, deltaTime);
+            Airplane.Movimentation(g_Inputs, deltaTime, VirtualScene, Scenario);
 
         Airplane.Draw(VirtualScene, GpuProgram, deltaTime);
 
