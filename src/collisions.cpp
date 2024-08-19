@@ -64,7 +64,7 @@ bool cube_origincircle_intersec(glm::vec3 min, glm::vec3 max, float radius)
     return false;
 }
 
-bool cube_elipsoid_intersec(glm::vec3 min, glm::vec3 max, float radius_x, float radius_y, float radius_z) {
+bool cube_halfelipsoid_intersec(glm::vec3 min, glm::vec3 max, float radius_x, float radius_y, float radius_z) {
     float value_min = (min.x * min.x) / (radius_x * radius_x) + 
                       (min.y * min.y) / (radius_y * radius_y) +
                       (min.z * min.z) / (radius_z * radius_z);
@@ -72,5 +72,5 @@ bool cube_elipsoid_intersec(glm::vec3 min, glm::vec3 max, float radius_x, float 
                       (max.y * max.y) / (radius_y * radius_y) +
                       (max.z * max.z) / (radius_z * radius_z);
 
-    return value_max <= 1.0f || value_min <= 1.0f;
+    return (value_max <= 1.0f || value_min <= 1.0f) && (min.y < 0.0f && max.y < 0.0f);
 }

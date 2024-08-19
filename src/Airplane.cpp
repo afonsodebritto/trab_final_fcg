@@ -72,7 +72,7 @@ void Airplane::Collisions(float delta_time, VirtualScene &VirtualScene, Scenario
     if(!flying)
         Position.y = 0;
 
-    bool elipsoid_intersc = cube_elipsoid_intersec(hitboxAirplane.first, hitboxAirplane.second, 1.0f, 0.5f, 1.0f);
+    bool elipsoid_intersc = cube_halfelipsoid_intersec(hitboxAirplane.first, hitboxAirplane.second, Scenario.radius, Scenario.radius/2, Scenario.radius);
     if(elipsoid_intersc)
         speed = 0;
 }
