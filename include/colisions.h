@@ -32,6 +32,7 @@
 #include <stb_image.h>
 
 bool cubo_cubo_intersc(glm::vec3 min_a, glm::vec3 max_a, glm::vec3 min_b, glm::vec3 max_b);
-std::pair<glm::vec3, glm::vec3> transformAABB(const glm::vec3& min, const glm::vec3& max, const glm::mat4& transform);
+std::pair<glm::vec3, glm::vec3> aplica_model_bbox(const glm::vec3& min, const glm::vec3& max, const glm::mat4& model);
+bool cubo_meia_elipse_intersc(glm::vec3 min_a, glm::vec3 max_a, glm::vec3 min_b, glm::vec3 max_b); 
 
 #endif
