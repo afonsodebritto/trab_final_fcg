@@ -21,12 +21,6 @@
 #include"Scenario.h"
 #include"collisions.h"
 
-#define FUSELAGE 0
-#define WHEEL_LEFT  1
-#define WHEEL_RIGHT  2
-#define ROTOR 3
-#define TREE 4
-
 class Airplane
 {
 public:

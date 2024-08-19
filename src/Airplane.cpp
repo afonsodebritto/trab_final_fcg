@@ -218,12 +218,12 @@ void Airplane::Draw(VirtualScene &VirtualScene, Shader &GpuProgram, float delta_
     // Desenhamos a fusilagem do avião
     glm::mat4 bodyMatrix = Matrix;
     glUniformMatrix4fv(GpuProgram.model_uniform, 1, GL_FALSE, glm::value_ptr(bodyMatrix));
-    glUniform1i(GpuProgram.object_id_uniform, FUSELAGE);
+    glUniform1i(GpuProgram.object_id_uniform, 0);
     VirtualScene.DrawVirtualObject("body", GpuProgram);
 
     glm::mat4 wingsMatrix = Matrix;
     glUniformMatrix4fv(GpuProgram.model_uniform, 1, GL_FALSE, glm::value_ptr(wingsMatrix));
-    glUniform1i(GpuProgram.object_id_uniform, FUSELAGE);
+    glUniform1i(GpuProgram.object_id_uniform, 0);
     VirtualScene.DrawVirtualObject("wings", GpuProgram);
 
     rotorSpeed += delta_time*speed;
@@ -233,6 +233,6 @@ void Airplane::Draw(VirtualScene &VirtualScene, Shader &GpuProgram, float delta_
     glm::mat4 rotorMatrix = Matrix * Matrix_Translate(0.0f, 0.39f, -0.73f) * Matrix_Rotate_Z(rotorSpeed);
 
     glUniformMatrix4fv(GpuProgram.model_uniform, 1, GL_FALSE, glm::value_ptr(rotorMatrix));
-    glUniform1i(GpuProgram.object_id_uniform, FUSELAGE);
+    glUniform1i(GpuProgram.object_id_uniform, 0);
     VirtualScene.DrawVirtualObject("rotor", GpuProgram);
 }

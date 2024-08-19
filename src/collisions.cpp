@@ -54,7 +54,7 @@ bool cube_origincircle_intersec(glm::vec3 min, glm::vec3 max, float radius)
 {
     // printf("%f\n", min.y);
     // printf("%f\n", max.y);
-    if((min.y < 0.0f || max.y < 0.0f) && (min.y > -0.1f || max.y > -0.1f))
+    if((min.y < 0.0f || max.y < 0.0f) && (min.y > -0.5f || max.y > -0.5f))
     {
         float distanceFromCenterMin = std::sqrt(min.x * min.x + min.z * min.z);
         float distanceFromCenterMax = std::sqrt(max.x * max.x + max.z * max.z);

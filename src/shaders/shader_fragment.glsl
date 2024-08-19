@@ -61,7 +61,7 @@ void main()
     // normais de cada vértice.
     vec4 n = normalize(normal);
 
-    vec4 light = vec4(0.1,1.0,0.0,0.0); // luz não varia com a posição do ponto, simulando luz solar.
+    vec4 light = vec4(0.3,1.0,0.0,0.0); // luz não varia com a posição do ponto, simulando luz solar.
     
     // Vetor que define o sentido da fonte de luz em relação ao ponto atual.
     vec4 l = normalize(light);
