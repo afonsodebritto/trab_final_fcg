@@ -19,12 +19,9 @@ uniform mat4 view;
 uniform mat4 projection;
 
 // Identificador que define qual objeto está sendo desenhado no momento
-#define FUSELAGE 0
-#define WHEEL_LEFT  1
-#define WHEEL_RIGHT  2
-#define ROTOR 3
-#define TREE 4
-#define CHAO 5
+#define AIRPLANE 0
+#define TREE 1
+#define CHAO 2
 uniform int object_id;
 
 // Parâmetros da axis-aligned bounding box (AABB) do modelo
@@ -81,7 +78,7 @@ void main()
 
     // Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
     vec3 Kd0;
-    if(object_id == FUSELAGE || object_id == WHEEL_LEFT || object_id == WHEEL_RIGHT || object_id == ROTOR)
+    if(object_id == AIRPLANE)
     {
         float U = texcoords.x;
         float V = texcoords.y;
@@ -97,7 +94,7 @@ void main()
     {
         float U = texcoords.x;
         float V = texcoords.y;
-        Kd0 = vec3(0.07, 0.03, 0.01);
+        Kd0 = texture(TextureImage2, vec2(U,V)).rgb;
     }
     
     // Equação de Iluminação de lambert
@@ -106,7 +103,7 @@ void main()
     color.a = 1;
 
     // O avião possui iluminação difusa (de lambert)
-    if(object_id == FUSELAGE || object_id == WHEEL_LEFT || object_id == WHEEL_RIGHT || object_id == ROTOR)
+    if(object_id == AIRPLANE)
     {
         color.rgb = termo_difuso_lambert;
     }

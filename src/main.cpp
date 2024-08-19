@@ -74,7 +74,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     GLFWwindow* window;
-    window = glfwCreateWindow(800, 800, "INF01047 - 00341650 - Vítor Hugo Magnus Oliveira", NULL, NULL);
+    window = glfwCreateWindow(800, 800, "Low Poly Flight", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -111,7 +111,7 @@ int main()
     //
     LoadTextureImage("../../data/11804_Airplane_diff.jpg");      // TextureImage0
     LoadTextureImage("../../data/Palette_Gradient.png");
-    LoadTextureImage("../../data/chao.png");
+    LoadTextureImage("../../data/chao.jpg");
 
     // Inicializamos o código para renderização de texto.
 
@@ -133,7 +133,7 @@ int main()
     glm::mat4 the_view;
     glm::mat4 model;
 
-    Airplane Airplane(glm::vec4(0.0f,0.0f,0.0f,1.0f), 10.0f, 50.0f);
+    Airplane Airplane(glm::vec4(0.0f,0.5f,0.0f,1.0f), 10.0f, 50.0f);
 
     float nearPlane = -0.1f;
     float farPlane  = -2000.0f;
@@ -288,13 +288,14 @@ void TextRendering(GLFWwindow* window, Airplane& airplane, Scenario &Scenario)
     // Variáveis estáticas (static) mantém seus valores entre chamadas
     // subsequentes da função!
     static char  bufferSpeed[20] = "0.00 km/h";
-    static int   numcharsSpeed = 17;
 
-    static char  bufferAltitude[20] = "0.00 m";
-    static int   numcharsAltitude = 17;
+    static char  bufferAltitude[20] = "y: ??? m";
 
-    static char  bufferPitch[20] = "0.00 deg";
-    static int   numcharsPitch = 16;
+    static char  bufferPitch[20] = "pitch: 0.00 deg";
+
+    static char  bufferYaw[20] = "yaw: 0.00 deg";
+
+    static char  bufferRoll[20] = "roll: 0.00 deg";
 
     static float old_seconds = (float)glfwGetTime();
     static int   ellapsed_frames = 0;
@@ -303,6 +304,10 @@ void TextRendering(GLFWwindow* window, Airplane& airplane, Scenario &Scenario)
 
     static char  bufferTrees[20] = "??? trees";
     static int   numcharsTrees = 10;
+
+    static char  bufferX[20] = "x: ??? m";
+
+    static char  bufferZ[20] = "z: ??? m";
 
     ellapsed_frames += 1;
 
@@ -321,26 +326,42 @@ void TextRendering(GLFWwindow* window, Airplane& airplane, Scenario &Scenario)
     }
 
 
-    numcharsSpeed = snprintf(bufferSpeed, 20, "%.2f km/h", fabs(airplane.speed)*3.6f);
+    snprintf(bufferSpeed, 20, "%.2f km/h", fabs(airplane.speed)*3.6f);
     
-    numcharsAltitude = snprintf(bufferAltitude, 20, "%.2f m", airplane.Position.y);
+    snprintf(bufferAltitude, 20, "y: %.2f m", airplane.Position.y);
     
-    numcharsPitch = snprintf(bufferPitch, 20, "%.2f deg", airplane.pitch*180/M_PI);
+    snprintf(bufferPitch, 20, "pitch: %.2f deg", airplane.pitch*180/M_PI);
+
+    snprintf(bufferYaw, 20, "pitch: %.2f deg", airplane.yaw*180/M_PI);
+
+    snprintf(bufferYaw, 20, "roll: %.2f deg", airplane.roll*180/M_PI);
 
     numcharsTrees = snprintf(bufferTrees, 20, "%d trees", Scenario.numTrees);
 
+    snprintf(bufferX, 20, "x: %.2f m", airplane.Position.x);
+
+    snprintf(bufferZ, 20, "z: %.2f m", airplane.Position.z);
+
     float lineheight = TextRendering_LineHeight(window);
     float charwidth = TextRendering_CharWidth(window);
-    
-    TextRendering_PrintString(window, bufferAltitude, -1.0f+charwidth, 1.0f-2*lineheight, 1.0f);
 
     TextRendering_PrintString(window, bufferSpeed, -1.0f+charwidth, 1.0f-lineheight, 1.0f);
 
-    TextRendering_PrintString(window, bufferPitch, -1.0f+charwidth, 1.0f-3*lineheight, 1.0f);
+    TextRendering_PrintString(window, bufferPitch, -1.0f+charwidth, -1.0f+3*lineheight, 1.0f);
+
+    TextRendering_PrintString(window, bufferYaw, -1.0f+charwidth, -1.0f+2*lineheight, 1.0f);
+
+    TextRendering_PrintString(window, bufferRoll, -1.0f+charwidth, -1.0f+lineheight, 1.0f);
 
     TextRendering_PrintString(window, bufferFPS, 1.0f-(numcharsFPS + 1)*charwidth, 1.0f-lineheight, 1.0f);
 
-    TextRendering_PrintString(window, bufferTrees, 1.0f-(numcharsTrees + 1)*charwidth, 1.0f-2*lineheight, 1.0f);
+    TextRendering_PrintString(window, bufferTrees, 1.0f-(numcharsTrees + 1)*charwidth, -1.0f+lineheight, 1.0f);
+
+    TextRendering_PrintString(window, bufferX, -1.0f+charwidth, 1.0f-2*lineheight, 1.0f);
+
+    TextRendering_PrintString(window, bufferAltitude, -1.0f+charwidth, 1.0f-3*lineheight, 1.0f);
+
+    TextRendering_PrintString(window, bufferZ, -1.0f+charwidth, 1.0f-4*lineheight, 1.0f);
 
 }
 

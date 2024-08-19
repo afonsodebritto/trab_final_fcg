@@ -43,6 +43,7 @@ Shader::Shader(const char* vertexFile, const char* fragmentFile)
     glUseProgram(ID);
     glUniform1i(glGetUniformLocation(ID, "TextureImage0"), 0);
     glUniform1i(glGetUniformLocation(ID, "TextureImage1"), 1);
+    glUniform1i(glGetUniformLocation(ID, "TextureImage2"), 2);
     glUseProgram(0);
 }
 

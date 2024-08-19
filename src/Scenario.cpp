@@ -27,7 +27,7 @@ Scenario::Scenario(float radius, float probability, VirtualScene &VirtualScene, 
 
             // Verificar se a posição do chunk está dentro do círculo de raio "radius"
             float distanceFromCenter = std::sqrt(xPos * xPos + zPos * zPos);
-            if (distanceFromCenter <= radius - 4)
+            if (distanceFromCenter <= radius - 4 && i != 0 && j != 0)
             {
                 // Gerar um número aleatório entre 0 e 1 para determinar se uma árvore será colocada
                 if (probDist(gen) < probability)
@@ -95,7 +95,7 @@ void Scenario::DrawTree(Tree tree, VirtualScene &VirtualScene, Shader &GpuProgra
     glm::mat4 treeModel = Matrix_Translate(tree.Position.x,tree.Position.y,tree.Position.z)
                           * Matrix_Scale(tree.Scale.x,tree.Scale.y,tree.Scale.z);
     glUniformMatrix4fv(GpuProgram.model_uniform, 1 , GL_FALSE , glm::value_ptr(treeModel));
-    glUniform1i(GpuProgram.object_id_uniform, 4);
+    glUniform1i(GpuProgram.object_id_uniform, 1);
     if(color == 0)
         VirtualScene.DrawVirtualObject("Tree_01_summer_red", GpuProgram);
     else if(color == 1)
@@ -116,7 +116,7 @@ void Scenario::DrawFloor(VirtualScene &VirtualScene, Shader &GpuProgram)
 {
     glm::mat4 chaoMatrix = Matrix_Scale(radius/100, radius/100, radius/100);
     glUniformMatrix4fv(GpuProgram.model_uniform, 1, GL_FALSE, glm::value_ptr(chaoMatrix));
-    glUniform1i(GpuProgram.object_id_uniform, 5);
+    glUniform1i(GpuProgram.object_id_uniform, 2);
 
     VirtualScene.DrawVirtualObject("Sphere", GpuProgram);
 }
