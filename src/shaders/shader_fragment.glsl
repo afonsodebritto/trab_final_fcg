@@ -13,6 +13,9 @@ in vec4 position_model;
 // Coordenadas de textura obtidas do arquivo OBJ (se existirem!)
 in vec2 texcoords;
 
+// Termo de lambert calculado pro gouraud
+in float lambert_gouraud;
+
 // Matrizes computadas no código C++ e enviadas para a GPU
 uniform mat4 model;
 uniform mat4 view;
@@ -105,7 +108,7 @@ void main()
     // O avião possui iluminação difusa (de lambert)
     if(object_id == AIRPLANE)
     {
-        color.rgb = termo_difuso_lambert;
+        color.rgb =  lambert_gouraud * I * Kd0;
     }
     
     // A árvore e chao possuem iluminção blinn-phong
@@ -116,7 +119,7 @@ void main()
         vec4 h = normalize(v + l);
 
         vec3 termo_ambiente = Kd0 * Ia;
-        vec3 termo_especular_blinn_phong = dot(n,h) * I * Kd0;
+        vec3 termo_especular_blinn_phong = pow(dot(n,h), q_linha) * I * Kd0;
 
         color.rgb = termo_difuso_lambert + termo_ambiente + termo_especular_blinn_phong;
     }

@@ -46,7 +46,6 @@ void TextRendering(GLFWwindow* window, Airplane& airplane, Scenario &Scenario);
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 void ErrorCallback(int error, const char* description);
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
-void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 
 float g_ScreenRatio = 1.0f;
 
@@ -83,7 +82,6 @@ int main()
     }
 
     glfwSetKeyCallback(window, KeyCallback);
-    glfwSetMouseButtonCallback(window, MouseButtonCallback);
 
     // Definimos a função de callback que será chamada sempre que a janela for
     // redimensionada, por consequência alterando o tamanho do "framebuffer"
@@ -133,7 +131,7 @@ int main()
     glm::mat4 the_view;
     glm::mat4 model;
 
-    Airplane Airplane(glm::vec4(0.0f,0.5f,0.0f,1.0f), 10.0f, 50.0f);
+    Airplane Airplane(glm::vec4(0.0f,1.0f,0.0f,1.0f), 10.0f, 50.0f);
 
     float nearPlane = -0.1f;
     float farPlane  = -2000.0f;
@@ -228,11 +226,6 @@ void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
     // O cast para float é necessário pois números inteiros são arredondados ao
     // serem divididos!
     g_ScreenRatio = (float)width / height;
-}
-
-// Função callback chamada sempre que o usuário aperta algum dos botões do mouse
-void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
-{
 }
 
 // Definição da função que será chamada sempre que o usuário pressionar alguma
@@ -332,9 +325,9 @@ void TextRendering(GLFWwindow* window, Airplane& airplane, Scenario &Scenario)
     
     snprintf(bufferPitch, 20, "pitch: %.2f deg", airplane.pitch*180/M_PI);
 
-    snprintf(bufferYaw, 20, "pitch: %.2f deg", airplane.yaw*180/M_PI);
+    snprintf(bufferYaw, 20, "yaw: %.2f deg", airplane.yaw*180/M_PI);
 
-    snprintf(bufferYaw, 20, "roll: %.2f deg", airplane.roll*180/M_PI);
+    snprintf(bufferRoll, 20, "roll: %.2f deg", airplane.roll*180/M_PI);
 
     numcharsTrees = snprintf(bufferTrees, 20, "%d trees", Scenario.numTrees);
 
