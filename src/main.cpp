@@ -161,7 +161,7 @@ int main()
     ObjModel chaoModel("../../data/chao.obj");
     VirtualScene.BuildTriangles(chaoModel);
 
-    Scenario Scenario(200.0f, 0.03f, VirtualScene, GpuProgram);
+    Scenario Scenario(100.0f, 0.003f, VirtualScene, GpuProgram);
 
 
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela

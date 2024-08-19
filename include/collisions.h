@@ -34,5 +34,6 @@
 bool cube_cube_intersec(glm::vec3 min_a, glm::vec3 max_a, glm::vec3 min_b, glm::vec3 max_b);
 std::pair<glm::vec3, glm::vec3> transformAABB(const glm::vec3& min, const glm::vec3& max, const glm::mat4& transform);
 bool cube_origincircle_intersec(glm::vec3 min, glm::vec3 max, float radius);
+bool cube_elipsoid_intersec(glm::vec3 min, glm::vec3 max, float radius_x, float radius_y, float radius_z);
 
 #endif

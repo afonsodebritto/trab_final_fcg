@@ -52,8 +52,8 @@ std::pair<glm::vec3, glm::vec3> transformAABB(const glm::vec3& min, const glm::v
 
 bool cube_origincircle_intersec(glm::vec3 min, glm::vec3 max, float radius)
 {
-    printf("%f\n", min.y);
-    printf("%f\n", max.y);
+    // printf("%f\n", min.y);
+    // printf("%f\n", max.y);
     if((min.y < 0.0f || max.y < 0.0f) && (min.y > -0.1f || max.y > -0.1f))
     {
         float distanceFromCenterMin = std::sqrt(min.x * min.x + min.z * min.z);
@@ -62,4 +62,15 @@ bool cube_origincircle_intersec(glm::vec3 min, glm::vec3 max, float radius)
             return true;
     }
     return false;
+}
+
+bool cube_elipsoid_intersec(glm::vec3 min, glm::vec3 max, float radius_x, float radius_y, float radius_z) {
+    float value_min = (min.x * min.x) / (radius_x * radius_x) + 
+                      (min.y * min.y) / (radius_y * radius_y) +
+                      (min.z * min.z) / (radius_z * radius_z);
+    float value_max = (max.x * max.x) / (radius_x * radius_x) + 
+                      (max.y * max.y) / (radius_y * radius_y) +
+                      (max.z * max.z) / (radius_z * radius_z);
+
+    return value_max <= 1.0f || value_min <= 1.0f;
 }
