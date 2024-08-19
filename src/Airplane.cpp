@@ -1,17 +1,13 @@
 #include "Airplane.h"
 
-void Airplane::Movimentation(Inputs inputs, float delta_time)
+void Airplane::Movimentation(Inputs inputs, float delta_time, VirtualScene &VirtualScene, Scenario &Scenario)
 {
-    if(speed<0) speed = 0;
-    // pitts special s2
-    // 10m = 1m = 1.0f -> valores adaptados para essa restrição
+
     // Atualiza a direção do avião considerando as rotações atuais
     Direction = Matrix_Rotate_Y(yaw) * Matrix_Rotate_X(pitch) * Matrix_Rotate_Z(roll) * glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
     Direction = Direction / norm(Direction);
-    const bool FLYING = Position.y > 0;
 
     // Sustentação (lift) que contrabalança a gravidade, mantendo o avião em voo
-
     UpdateRotation(inputs.keyPressedD, inputs.keyPressedA, inputs.keyPressedS, inputs.keyPressedW, delta_time);
     UpdateSpeed(inputs.keyPressedLeftShift, inputs.keyPressedLeftControl, delta_time);
     UpdateAirDensity();
@@ -33,16 +29,48 @@ void Airplane::Movimentation(Inputs inputs, float delta_time)
 
     Velocity += DragAcceleration * delta_time;
 
+    float distanceFromCenter = std::sqrt(Position.x * Position.x + Position.z * Position.z);
     Position += Velocity;
-
-    if (Position.y < 0)
-        Position.y = 0;
 
     // Atualiza a matriz de transformação do avião
     Matrix = Matrix_Translate(Position.x, Position.y, Position.z) *
              Matrix_Rotate_Y(yaw) *
              Matrix_Rotate_X(pitch) *
              Matrix_Rotate_Z(roll);
+
+    Collisions(delta_time, VirtualScene, Scenario);
+}
+
+void Airplane::Collisions(float delta_time, VirtualScene &VirtualScene, Scenario &Scenario)
+{
+    std::vector<Tree> adjascentTrees = Scenario.getAdjascentTrees(Position);
+
+    std::pair<glm::vec3, glm::vec3> hitboxAirplane = transformAABB(VirtualScene.Objects["body"].bbox_min,
+                                                                   VirtualScene.Objects["body"].bbox_max,
+                                                                   Matrix);
+
+    Tree tree;
+    glm::mat4 transformation;
+
+    //printf("adjascentreees: %d",adjascentTrees.size());
+    for(int i = 0; i < adjascentTrees.size(); i++)
+    {
+        tree = adjascentTrees[i];
+        transformation = Matrix_Translate(tree.Position.x, tree.Position.y, tree.Position.z)
+                         * Matrix_Scale(tree.Scale.x, tree.Scale.y, tree.Scale.z);
+        std::pair<glm::vec3, glm::vec3> hitboxTree = transformAABB(VirtualScene.Objects["Tree_01_summer"].bbox_min,
+                                   VirtualScene.Objects["Tree_01_summer"].bbox_max,
+                                   transformation);
+        if(cube_cube_intersec(hitboxAirplane.first, hitboxAirplane.second, hitboxTree.first, hitboxTree.second))
+        {
+            speed = 0;
+            break;
+        }
+    }
+
+    flying = !cube_origincircle_intersec(hitboxAirplane.first, hitboxAirplane.second, Scenario.radius);
+    if(!flying)
+        Position.y = 0;
 }
 
 void Airplane::UpdateSpeed(bool accelerate, bool brake, float delta_time)
@@ -50,22 +78,20 @@ void Airplane::UpdateSpeed(bool accelerate, bool brake, float delta_time)
     float drag_force = 0.5f * drag_coefficient * air_density * pow(speed, 2) * reference_area;
     float air_deceleration = drag_force / mass;
 
-    const bool FLYING = Position.y > 0;
-
     if (accelerate && speed < max_speed)
-        if(!FLYING)
+        if(!flying)
             speed += acceleration/2 * delta_time;
         else
             speed += acceleration * delta_time;
 
     if (brake && speed > 0)
-        if(!FLYING)
+        if(!flying)
             speed -= acceleration * delta_time;
         else
             speed -= acceleration/2 * delta_time;
 
     if (!accelerate && speed > 0)
-        if(!FLYING)
+        if(!flying)
             speed -= acceleration/50 * delta_time;
         else
             speed -= air_deceleration * delta_time;
@@ -78,19 +104,16 @@ void Airplane::UpdateRotation(bool rotateRight, bool rotateLeft, bool rotateUp, 
     float delta_rotate_roll = acceleration_rotate * (fabs(roll) + 1) / 50;
     float delta_rotate_yaw = acceleration_rotate * (fabs(roll) + 1) / 50;
 
-    // Aceleração e desaceleração
-    const bool FLYING = Position.y > 0;
     const float MAX_ROLL = M_PI/3;
     const float MAX_PITCH = M_PI/3;
 
-    // Controle de rotação: rolagem e arfagem
     if (rotateLeft)
     {
         if(roll > 0)
             yaw += delta_rotate_yaw;
-        else if(!FLYING && speed > 0)
+        else if(!flying && speed > 0)
             yaw += 1/(35*pow(speed+2,2)); 
-        if(FLYING && roll < MAX_ROLL)
+        if(flying && roll < MAX_ROLL)
             roll += delta_rotate_roll;
     }
 
@@ -98,16 +121,16 @@ void Airplane::UpdateRotation(bool rotateRight, bool rotateLeft, bool rotateUp, 
     {
         if(roll < 0)
             yaw -= delta_rotate_yaw;
-        else if(!FLYING && speed > 0)
+        else if(!flying && speed > 0)
             yaw -= 1/(35*pow(speed+2,2));
-        if(FLYING && roll > -MAX_ROLL)
+        if(flying && roll > -MAX_ROLL)
             roll -= delta_rotate_roll;
     }
 
-    if (rotateUp && FLYING && pitch <= MAX_PITCH)
+    if (rotateUp && flying && pitch <= MAX_PITCH)
         pitch += delta_rotate_pitch;
 
-    if (rotateDown && FLYING && pitch >= -MAX_PITCH)
+    if (rotateDown && flying && pitch >= -MAX_PITCH)
         pitch -= delta_rotate_pitch;
 
     if (!rotateRight && !rotateLeft)
@@ -122,7 +145,7 @@ void Airplane::UpdateRotation(bool rotateRight, bool rotateLeft, bool rotateUp, 
             if(roll > 0) roll = 0;
         }
 
-    if (!FLYING) {
+    if (!flying) {
         if(pitch > -MAX_PITCH-1 && pitch < 0)
         {
             pitch += delta_rotate_pitch*2;
@@ -193,6 +216,11 @@ void Airplane::Draw(VirtualScene &VirtualScene, Shader &GpuProgram, float delta_
     glUniformMatrix4fv(GpuProgram.model_uniform, 1, GL_FALSE, glm::value_ptr(bodyMatrix));
     glUniform1i(GpuProgram.object_id_uniform, FUSELAGE);
     VirtualScene.DrawVirtualObject("body", GpuProgram);
+
+    glm::mat4 wingsMatrix = Matrix;
+    glUniformMatrix4fv(GpuProgram.model_uniform, 1, GL_FALSE, glm::value_ptr(wingsMatrix));
+    glUniform1i(GpuProgram.object_id_uniform, FUSELAGE);
+    VirtualScene.DrawVirtualObject("wings", GpuProgram);
 
     rotorSpeed += delta_time*speed;
 

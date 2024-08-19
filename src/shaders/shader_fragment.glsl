@@ -24,6 +24,7 @@ uniform mat4 projection;
 #define WHEEL_RIGHT  2
 #define ROTOR 3
 #define TREE 4
+#define CHAO 5
 uniform int object_id;
 
 // Parâmetros da axis-aligned bounding box (AABB) do modelo
@@ -33,6 +34,7 @@ uniform vec4 bbox_max;
 // Variáveis para acesso das imagens de textura
 uniform sampler2D TextureImage0;
 uniform sampler2D TextureImage1;
+uniform sampler2D TextureImage2;
 
 // O valor de saída ("out") de um Fragment Shader é a cor final do fragmento.
 out vec4 color;
@@ -59,7 +61,7 @@ void main()
     // normais de cada vértice.
     vec4 n = normalize(normal);
 
-    vec4 light = vec4(1000.0,1000.0,0.0,0.0); // luz não varia com a posição do ponto, simulando luz solar.
+    vec4 light = vec4(0.1,1.0,0.0,0.0); // luz não varia com a posição do ponto, simulando luz solar.
     
     // Vetor que define o sentido da fonte de luz em relação ao ponto atual.
     vec4 l = normalize(light);
@@ -91,6 +93,12 @@ void main()
         float V = texcoords.y;
         Kd0 = texture(TextureImage1, vec2(U,V)).rgb;
     }
+    else if(object_id == CHAO)
+    {
+        float U = texcoords.x;
+        float V = texcoords.y;
+        Kd0 = vec3(0.07, 0.03, 0.01);
+    }
     
     // Equação de Iluminação de lambert
     vec3 termo_difuso_lambert = max(0,dot(n,l)) * I * Kd0;
@@ -103,8 +111,8 @@ void main()
         color.rgb = termo_difuso_lambert;
     }
     
-    // A árvore possui iluminção blinn-phong
-    if(object_id == TREE)
+    // A árvore e chao possuem iluminção blinn-phong
+    if(object_id == TREE || object_id == CHAO)
     {
         float q_linha = 80.0; 
 

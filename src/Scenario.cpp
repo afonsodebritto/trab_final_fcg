@@ -27,7 +27,7 @@ Scenario::Scenario(float radius, float probability, VirtualScene &VirtualScene, 
 
             // Verificar se a posição do chunk está dentro do círculo de raio "radius"
             float distanceFromCenter = std::sqrt(xPos * xPos + zPos * zPos);
-            if (distanceFromCenter <= radius)
+            if (distanceFromCenter <= radius - 4)
             {
                 // Gerar um número aleatório entre 0 e 1 para determinar se uma árvore será colocada
                 if (probDist(gen) < probability)
@@ -81,7 +81,8 @@ std::vector<Tree> Scenario::getAdjascentTrees(glm::vec4 Position)
             {
                 // Adicionar a árvore do chunk vizinho, se existir
                 Tree &tree = treeMatrix[neighborX][neighborZ];
-                adjacentTrees.push_back(tree);
+                if(tree.Position != glm::vec4(0.0f, 0.0f, 0.0f, 0.0f))
+                    adjacentTrees.push_back(tree);
             }
         }
     }
@@ -109,4 +110,13 @@ void Scenario::DrawAllTrees(VirtualScene &VirtualScene, Shader &GpuProgram)
     {
         DrawTree(treeVector[i], VirtualScene, GpuProgram, i % 3);
     }
+}
+
+void Scenario::DrawFloor(VirtualScene &VirtualScene, Shader &GpuProgram)
+{
+    glm::mat4 chaoMatrix = Matrix_Scale(radius/100, radius/100, radius/100);
+    glUniformMatrix4fv(GpuProgram.model_uniform, 1, GL_FALSE, glm::value_ptr(chaoMatrix));
+    glUniform1i(GpuProgram.object_id_uniform, 5);
+
+    VirtualScene.DrawVirtualObject("Sphere", GpuProgram);
 }

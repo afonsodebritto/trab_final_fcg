@@ -17,7 +17,6 @@
 class Camera
 {
 public:
-	// Stores the main vectors of the camera
 	glm::vec4 Position;
 	glm::vec4 Up;
 	glm::vec4 View;
