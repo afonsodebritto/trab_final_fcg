@@ -53,6 +53,7 @@ Inputs g_Inputs;
 
 // Variável que controla se o texto informativo será mostrado na tela.
 bool g_ShowInfoText = true;
+bool g_Reset = true;
 
 int main()
 {
@@ -187,6 +188,12 @@ int main()
         if(cameraType == LOOKAT_CAMERA && Camera.movingThroughBezierCurve == false)
             Airplane.Movimentation(g_Inputs, deltaTime, VirtualScene, Scenario);
 
+        if(g_Reset)
+        {
+            Airplane.Position = glm::vec4(0.0f,0.0f,0.0f,1.0f);
+            g_Reset = false;
+        }
+
         Airplane.Draw(VirtualScene, GpuProgram, deltaTime);
 
         Scenario.DrawAllTrees(VirtualScene, GpuProgram);
@@ -232,6 +239,7 @@ void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
 // tecla do teclado. Veja http://www.glfw.org/docs/latest/input_guide.html#input_key
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
 {
+    // Apesar de não ser lab, não removemos o loop :)
     // ====================
     // Não modifique este loop! Ele é utilizando para correção automatizada dos
     // laboratórios. Deve ser sempre o primeiro comando desta função KeyCallback().
@@ -264,6 +272,12 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
     if (key == GLFW_KEY_H && action == GLFW_PRESS)
     {
         g_ShowInfoText = !g_ShowInfoText;
+    }
+
+    // Se o usuário apertar a tecla H, fazemos um "toggle" do texto informativo mostrado na tela.
+    if (key == GLFW_KEY_R && action == GLFW_PRESS)
+    {
+        g_Reset = !g_Reset;
     }
 }
 
