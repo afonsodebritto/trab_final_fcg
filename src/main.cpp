@@ -53,6 +53,7 @@ Inputs g_Inputs;
 
 // Variável que controla se o texto informativo será mostrado na tela.
 bool g_ShowInfoText = true;
+bool g_Reset = false;
 
 int main()
 {
@@ -109,7 +110,7 @@ int main()
     //
     LoadTextureImage("../../data/11804_Airplane_diff.jpg");      // TextureImage0
     LoadTextureImage("../../data/Palette_Gradient.png");
-    LoadTextureImage("../../data/chao.jpg");
+    LoadTextureImage("../../data/chao.png");
 
     // Inicializamos o código para renderização de texto.
 
@@ -186,6 +187,12 @@ int main()
 
         if(cameraType == LOOKAT_CAMERA && Camera.movingThroughBezierCurve == false)
             Airplane.Movimentation(g_Inputs, deltaTime, VirtualScene, Scenario);
+
+        if(g_Reset)
+        {
+            Airplane.Position = glm::vec4(0.0f,1.0f,0.0f,1.0f);
+            g_Reset = false;
+        }
 
         Airplane.Draw(VirtualScene, GpuProgram, deltaTime);
 
@@ -264,6 +271,11 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
     if (key == GLFW_KEY_H && action == GLFW_PRESS)
     {
         g_ShowInfoText = !g_ShowInfoText;
+    }
+
+    if (key == GLFW_KEY_R && action == GLFW_PRESS)
+    {
+        g_Reset = !g_Reset;
     }
 }
 
